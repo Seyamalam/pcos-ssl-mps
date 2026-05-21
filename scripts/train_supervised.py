@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import copy
 import json
 from pathlib import Path
 
@@ -20,6 +21,11 @@ from pcos_ssl.utils.runtime import configure_runtime
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Train a supervised PCOS classifier baseline.")
     parser.add_argument("--config", type=Path, default=Path("configs/baseline.yaml"))
+    parser.add_argument("--split-csv", type=Path, default=None)
+    parser.add_argument("--backbone", type=str, default=None)
+    parser.add_argument("--image-size", type=int, default=None)
+    parser.add_argument("--batch-size", type=int, default=None)
+    parser.add_argument("--num-workers", type=int, default=None)
     parser.add_argument("--epochs", type=int, default=None)
     parser.add_argument("--pretrained", action=argparse.BooleanOptionalAction, default=None)
     parser.add_argument("--max-train-batches", type=int, default=None)
@@ -48,7 +54,17 @@ def make_loader(dataset, batch_size: int, shuffle: bool, num_workers: int) -> Da
 
 def main() -> None:
     args = parse_args()
-    config = load_config(args.config)
+    config = copy.deepcopy(load_config(args.config))
+    if args.split_csv is not None:
+        config["data"]["split_csv"] = str(args.split_csv)
+    if args.backbone is not None:
+        config["model"]["backbone"] = args.backbone
+    if args.image_size is not None:
+        config["data"]["image_size"] = args.image_size
+    if args.batch_size is not None:
+        config["training"]["batch_size"] = args.batch_size
+    if args.num_workers is not None:
+        config["training"]["num_workers"] = args.num_workers
     runtime = configure_runtime(
         seed=int(config["seed"]),
         cpu_threads=int(config["runtime"].get("cpu_threads", 18)),

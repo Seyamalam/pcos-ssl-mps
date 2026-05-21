@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import copy
 import json
 from pathlib import Path
 
@@ -21,6 +22,11 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Fine-tune or linear-probe a SimCLR encoder.")
     parser.add_argument("--config", type=Path, default=Path("configs/finetune_simclr.yaml"))
     parser.add_argument("--checkpoint", type=Path, default=None)
+    parser.add_argument("--split-csv", type=Path, default=None)
+    parser.add_argument("--backbone", type=str, default=None)
+    parser.add_argument("--image-size", type=int, default=None)
+    parser.add_argument("--batch-size", type=int, default=None)
+    parser.add_argument("--num-workers", type=int, default=None)
     parser.add_argument("--epochs", type=int, default=None)
     parser.add_argument("--label-fraction", type=float, default=1.0)
     parser.add_argument("--freeze-encoder", action=argparse.BooleanOptionalAction, default=None)
@@ -49,7 +55,17 @@ def make_loader(dataset, batch_size: int, shuffle: bool, num_workers: int) -> Da
 
 def main() -> None:
     args = parse_args()
-    config = load_config(args.config)
+    config = copy.deepcopy(load_config(args.config))
+    if args.split_csv is not None:
+        config["data"]["split_csv"] = str(args.split_csv)
+    if args.backbone is not None:
+        config["model"]["backbone"] = args.backbone
+    if args.image_size is not None:
+        config["data"]["image_size"] = args.image_size
+    if args.batch_size is not None:
+        config["training"]["batch_size"] = args.batch_size
+    if args.num_workers is not None:
+        config["training"]["num_workers"] = args.num_workers
     runtime = configure_runtime(
         seed=int(config["seed"]),
         cpu_threads=int(config["runtime"].get("cpu_threads", 18)),

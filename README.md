@@ -4,6 +4,12 @@ Living research notebook for a PyTorch/MPS study on PCOS ultrasound classificati
 
 Dataset source: <https://www.kaggle.com/datasets/ibadeus/pcos-xai-ultrasound-dataset/data>
 
+Companion research notes:
+
+- [Experiment ledger](docs/EXPERIMENTS.md)
+- [Decision log](docs/DECISIONS.md)
+- [Manuscript notes](docs/MANUSCRIPT_NOTES.md)
+
 ## Research Goal
 
 Develop and evaluate self-supervised learning methods that can learn useful ovarian ultrasound representations from a noisy, duplicate-heavy, mixed-quality PCOS dataset, then fine-tune those representations for PCOS vs healthy ovary classification under leakage-controlled evaluation.
@@ -50,6 +56,9 @@ Known dataset issues from local inspection:
 | Exact duplicate groups | 1,956 |
 | Duplicate files beyond first copy | 7,788 |
 | Cross-class exact duplicate groups | 0 |
+| pHash near-duplicate groups | 1,788 |
+| pHash near-duplicate files beyond first | 9,448 |
+| Cross-class pHash near-duplicate groups | 38 |
 | Mixed naming conventions | Yes |
 | Mixed preprocessing/resolution | Expected; needs full audit |
 
@@ -126,8 +135,9 @@ Status:
 - [x] Counted class folders.
 - [x] Found exact duplicate groups with MD5.
 - [x] Audit dimensions and image modes.
-- [ ] Detect near-duplicates.
+- [x] Detect pHash near-duplicates.
 - [x] Build exact duplicate-aware split files.
+- [x] Build pHash near-duplicate-aware split files.
 
 ### Phase 2: Baseline Supervised Models
 
@@ -157,9 +167,9 @@ Status:
 
 - [x] Implement supervised training pipeline.
 - [x] Implement metrics.
-- [ ] Train first supervised baseline.
+- [x] Train first supervised baseline.
 - [x] Run MPS smoke test.
-- [ ] Save full baseline result table.
+- [x] Save first full baseline result table.
 
 ### Phase 3: Self-Supervised Pretraining
 
@@ -239,9 +249,9 @@ Tests:
 
 Status:
 
-- [ ] Implement test-time corruption suite.
+- [x] Implement test-time corruption suite.
 - [ ] Compare supervised vs SSL robustness.
-- [ ] Create robustness result table.
+- [x] Create first robustness result table.
 
 ### Phase 6: Explainability Audit
 
@@ -403,8 +413,12 @@ Run real supervised baselines first, then launch SimCLR for enough epochs to com
 |---|---|---|---|---:|---:|---:|---:|---:|---|
 | TBD | Supervised | ResNet-18 | Duplicate-aware | 100% | Pending | Pending | Pending | Pending | Baseline |
 | resnet18-supervised-exact-e1 | Supervised | ResNet-18 | Exact duplicate-aware | 100% | 0.9960 | 0.9997 | 0.9964 | 0.0304 | One epoch; suspiciously high, needs near-duplicate benchmark |
+| resnet18-supervised-phash-e1 | Supervised | ResNet-18 | pHash near-duplicate-aware | 100% | 0.9924 | 0.9994 | 0.9933 | 0.0183 | One epoch; still very high under stricter split |
+| efficientnet-b0-supervised-phash-e1 | Supervised | EfficientNet-B0 | pHash near-duplicate-aware | 100% | 0.9635 | 0.9972 | 0.9681 | 0.0266 | Strong but below ResNet-18 after one epoch |
+| vit-tiny-supervised-phash-e1 | Supervised | ViT-Tiny/16 | pHash near-duplicate-aware | 100% | 0.9421 | 0.9986 | 0.9457 | 0.0386 | High AUROC with conservative threshold behavior |
 | smoke-001 | Supervised | ResNet-18 | Duplicate-aware | N/A | N/A | N/A | N/A | N/A | Runtime-only MPS smoke test; not a real result |
 | smoke-002 | SimCLR | ResNet-18 | Duplicate-aware train split | N/A | N/A | N/A | N/A | N/A | One-batch MPS smoke test; loss 4.1280 |
+| simclr-resnet18-phash-e1-linear-10pct-e1 | SimCLR + linear probe | ResNet-18 | pHash near-duplicate-aware | 10% | 0.6388 | 0.7781 | 0.5754 | 0.1055 | One-epoch SSL pretraining only; pipeline validation |
 | TBD | SimCLR + linear probe | ResNet-18 | Duplicate-aware | 5% | Pending | Pending | Pending | Pending | SSL low-label |
 | TBD | SimCLR + fine-tune | ResNet-18 | Duplicate-aware | 100% | Pending | Pending | Pending | Pending | SSL full-label |
 
