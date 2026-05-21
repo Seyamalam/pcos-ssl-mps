@@ -1,0 +1,21 @@
+seed: 42
+runtime:
+  device: mps
+  cpu_threads: 18
+data:
+  split_csv: metadata/splits_duplicate_aware.csv
+  image_size: 224
+training:
+  batch_size: 64
+  num_workers: 8
+  epochs: 100
+  optimizer: adamw
+  learning_rate: 0.0003
+  weight_decay: 0.000001
+  temperature: 0.2
+model:
+  backbone: resnet18
+  projection_dim: 128
+  hidden_dim: 512
+  pretrained: false
+

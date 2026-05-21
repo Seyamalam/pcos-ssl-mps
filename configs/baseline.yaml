@@ -1,0 +1,20 @@
+seed: 42
+runtime:
+  device: mps
+  cpu_threads: 18
+data:
+  dataset_root: PCOS
+  image_size: 224
+  split_csv: metadata/splits_duplicate_aware.csv
+training:
+  batch_size: 64
+  num_workers: 8
+  pin_memory: false
+  epochs: 30
+  optimizer: adamw
+  learning_rate: 0.0003
+  weight_decay: 0.0001
+model:
+  backbone: resnet18
+  pretrained: true
+

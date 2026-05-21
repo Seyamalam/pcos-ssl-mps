@@ -1,0 +1,13 @@
+.DS_Store
+.venv/
+PCOS/
+__pycache__/
+*.py[cod]
+.ruff_cache/
+
+checkpoints/
+runs/
+reports/figures/
+*.pt
+*.pth
+*.ckpt
