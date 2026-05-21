@@ -15,9 +15,10 @@ Working queue for the PCOS SSL manuscript experiments.
    - Compare 1, 5, 10, and 25 downstream epochs.
    - Watch calibration, not just accuracy/AUROC.
 
-3. Tune decision thresholds on validation data.
+3. Extend validation-selected threshold analysis.
    - Current SSL fine-tuned models often have perfect specificity but weak sensitivity at the default 0.5 threshold.
-   - Add validation-selected thresholds for balanced accuracy, Youden index, and sensitivity-constrained settings.
+   - Validation-selected thresholds have been added for balanced accuracy, Youden index, F1, and sensitivity-constrained settings.
+   - Next: add confidence intervals for tuned operating points and decide which objective belongs in the main manuscript table.
 
 4. Add more SSL methods.
    - BYOL as the next non-contrastive method.
@@ -41,6 +42,6 @@ The first pass does not yet show SSL superiority. Supervised ImageNet-pretrained
 ## Blockers To Resolve
 
 - Inspect the 38 cross-label pHash near-duplicate groups.
-- Add validation-selected threshold evaluation.
+- Add confidence intervals for validation-selected threshold evaluation.
 - Add multi-seed experiment runner to avoid manual command loops.
 - Decide whether to include random image split only as a leakage demonstration.

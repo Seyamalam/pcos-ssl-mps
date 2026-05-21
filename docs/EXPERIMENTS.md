@@ -116,6 +116,23 @@ All rows below use the pHash near-duplicate-aware split and one downstream epoch
 | 0.25 | 0.9320 | 0.9937 | 0.9138 | 0.9878 | SSL trails but is not collapsed. |
 | 0.50 | 0.9843 | 0.9992 | 0.9484 | 0.9893 | Supervised is stronger in the first sweep. |
 
+## Validation-Selected Threshold Results
+
+Thresholds are selected on validation predictions and then applied unchanged to the test split. The table below uses the balanced-accuracy-selected threshold.
+
+| Run ID | Label fraction | Selected threshold | Default acc | Tuned acc | Default sensitivity | Tuned sensitivity | Tuned specificity | AUROC |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| `resnet18_supervised_phash_5pct_e1` | 0.05 | 0.4349 | 0.8106 | 0.9062 | 0.6629 | 0.9406 | 0.8621 | 0.9734 |
+| `resnet18_supervised_phash_10pct_e1` | 0.10 | 0.4580 | 0.9427 | 0.9654 | 0.8981 | 0.9474 | 0.9885 | 0.9930 |
+| `resnet18_supervised_phash_25pct_e1` | 0.25 | 0.2482 | 0.9320 | 0.9547 | 0.8791 | 0.9351 | 0.9799 | 0.9937 |
+| `resnet18_supervised_phash_50pct_e1` | 0.50 | 0.3242 | 0.9843 | 0.9899 | 0.9720 | 0.9821 | 1.0000 | 0.9992 |
+| `simclr_resnet18_phash_e25_finetune_05pct_e1` | 0.05 | 0.3389 | 0.5595 | 0.8156 | 0.2161 | 0.7413 | 0.9109 | 0.9367 |
+| `simclr_resnet18_phash_e25_finetune_10pct_e1` | 0.10 | 0.4211 | 0.9308 | 0.9534 | 0.8768 | 0.9171 | 1.0000 | 0.9711 |
+| `simclr_resnet18_phash_e25_finetune_25pct_e1` | 0.25 | 0.1542 | 0.9138 | 0.9572 | 0.8466 | 0.9395 | 0.9799 | 0.9878 |
+| `simclr_resnet18_phash_e25_finetune_50pct_e1` | 0.50 | 0.4668 | 0.9484 | 0.9597 | 0.9082 | 0.9283 | 1.0000 | 0.9893 |
+
+Interpretation: validation-selected thresholding materially changes the low-label comparison. It does not change AUROC, but it exposes that the default 0.5 threshold was suppressing sensitivity, especially for SSL fine-tuned models.
+
 ## Failed or Non-Paper Runs
 
 | Date | Run | What happened | Decision |

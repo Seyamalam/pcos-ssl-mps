@@ -481,6 +481,21 @@ Checkpoint: `runs/resnet18_supervised_exact_e1/best_model.pt`
 | SimCLR ResNet-18 10% linear probe | 0.6388 | 0.5437 | 0.5538 | 0.6973 | Pipeline validation only |
 | SimCLR ResNet-18 e25 50% fine-tune | 0.9484 | 0.5639 | 0.5670 | 0.8785 | Better noise robustness than supervised ResNet, still blur/downsample brittle |
 
+### Validation-Selected Threshold Snapshot
+
+Thresholds are selected on the validation split only, then locked before test evaluation. This is important because several one-epoch models rank cases well but are poorly aligned to the default 0.5 operating point.
+
+| Experiment | Label budget | Default acc | Tuned acc | Default sensitivity | Tuned sensitivity | Tuned specificity | AUROC |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| ResNet-18 supervised | 5% | 0.8106 | 0.9062 | 0.6629 | 0.9406 | 0.8621 | 0.9734 |
+| ResNet-18 supervised | 10% | 0.9427 | 0.9654 | 0.8981 | 0.9474 | 0.9885 | 0.9930 |
+| ResNet-18 supervised | 25% | 0.9320 | 0.9547 | 0.8791 | 0.9351 | 0.9799 | 0.9937 |
+| ResNet-18 supervised | 50% | 0.9843 | 0.9899 | 0.9720 | 0.9821 | 1.0000 | 0.9992 |
+| SimCLR e25 fine-tune | 5% | 0.5595 | 0.8156 | 0.2161 | 0.7413 | 0.9109 | 0.9367 |
+| SimCLR e25 fine-tune | 10% | 0.9308 | 0.9534 | 0.8768 | 0.9171 | 1.0000 | 0.9711 |
+| SimCLR e25 fine-tune | 25% | 0.9138 | 0.9572 | 0.8466 | 0.9395 | 0.9799 | 0.9878 |
+| SimCLR e25 fine-tune | 50% | 0.9484 | 0.9597 | 0.9082 | 0.9283 | 1.0000 | 0.9893 |
+
 ### Failed Attempts
 
 | Date | Attempt | What failed | Likely reason | Decision |

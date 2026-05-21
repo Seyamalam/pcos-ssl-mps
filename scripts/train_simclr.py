@@ -26,6 +26,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--batch-size", type=int, default=None)
     parser.add_argument("--num-workers", type=int, default=None)
     parser.add_argument("--epochs", type=int, default=None)
+    parser.add_argument("--seed", type=int, default=None)
     parser.add_argument("--max-train-batches", type=int, default=None)
     parser.add_argument("--output-dir", type=Path, default=Path("runs/simclr_smoke"))
     return parser.parse_args()
@@ -66,6 +67,8 @@ def main() -> None:
         config["training"]["batch_size"] = args.batch_size
     if args.num_workers is not None:
         config["training"]["num_workers"] = args.num_workers
+    if args.seed is not None:
+        config["seed"] = args.seed
     runtime = configure_runtime(
         seed=int(config["seed"]),
         cpu_threads=int(config["runtime"].get("cpu_threads", 18)),
