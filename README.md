@@ -109,6 +109,34 @@ Important notes:
 5. Do SSL-trained models produce more anatomically meaningful explanations?
 6. Are the learned models robust to resolution, crop, contrast, and artifact changes?
 
+## Methodology Flowchart
+
+```mermaid
+flowchart TD
+    A["Raw PCOS-XAI ultrasound dataset<br/>11,784 images"] --> B["Dataset audit<br/>readability, dimensions, class counts"]
+    B --> C["Duplicate analysis<br/>MD5 exact duplicates"]
+    B --> D["Near-duplicate analysis<br/>pHash Hamming distance <= 4"]
+    C --> E["Exact duplicate-aware split<br/>no MD5 group crosses train/val/test"]
+    D --> F["pHash near-duplicate-aware split<br/>cross-label near groups excluded"]
+
+    E --> G["Supervised baselines<br/>ResNet, EfficientNet, ConvNeXt, ViT"]
+    F --> G
+    F --> H["Self-supervised pretraining<br/>SimCLR on unlabeled train images"]
+
+    G --> I["Clean test evaluation<br/>Accuracy, AUROC, AUPRC, F1, ECE"]
+    H --> J["Downstream evaluation<br/>linear probe and fine-tuning"]
+
+    J --> K["Label-efficiency study<br/>5%, 10%, 25%, 50%, 100% labels"]
+    G --> K
+
+    I --> L["Robustness tests<br/>crop, contrast, blur, downsample, noise"]
+    K --> L
+    L --> M["Explainability audit<br/>Grad-CAM and attribution stability"]
+
+    M --> N["Manuscript evidence<br/>leakage control, label efficiency, robustness, XAI"]
+    L --> N
+```
+
 ## Experimental Design
 
 ### Phase 1: Dataset Audit
@@ -201,8 +229,8 @@ Status:
 - [x] Implement SSL dataset loader.
 - [x] Implement SimCLR pretraining.
 - [x] Run small MPS smoke test.
-- [ ] Run full SimCLR pretraining.
-- [ ] Save encoder checkpoint.
+- [x] Run full SimCLR pretraining.
+- [x] Save encoder checkpoint.
 - [ ] Try BYOL.
 - [ ] Try DINO/ViT if feasible.
 
@@ -214,10 +242,10 @@ Label budgets:
 
 | Label budget | Supervised ImageNet baseline | SSL encoder | Notes |
 |---:|---|---|---|
-| 5% | Pending | Pending | Low-label regime |
-| 10% | Pending | Pending | Low-label regime |
-| 25% | Pending | Pending | Medium-label regime |
-| 50% | Pending | Pending | Medium-label regime |
+| 5% | ResNet-18: acc 0.8106, AUROC 0.9734 | SimCLR e25 full fine-tune: acc 0.5595, AUROC 0.9367 | SSL rank signal exists, threshold behavior poor after one fine-tune epoch |
+| 10% | ResNet-18: acc 0.9427, AUROC 0.9930 | SimCLR e25 full fine-tune: acc 0.9308, AUROC 0.9711 | SSL accuracy close, AUROC below supervised |
+| 25% | ResNet-18: acc 0.9320, AUROC 0.9937 | SimCLR e25 full fine-tune: acc 0.9138, AUROC 0.9878 | SSL trails supervised in first pass |
+| 50% | ResNet-18: acc 0.9843, AUROC 0.9992 | SimCLR e25 full fine-tune: acc 0.9484, AUROC 0.9893 | Supervised still stronger after one epoch |
 | 100% | Pending | Pending | Full-label comparison |
 
 Fine-tuning modes:
@@ -231,7 +259,7 @@ Status:
 - [ ] Create label-budget split generator.
 - [ ] Run linear-probe experiments.
 - [ ] Run partial fine-tuning experiments.
-- [ ] Run full fine-tuning experiments.
+- [x] Run first full fine-tuning experiments.
 
 ### Phase 5: Robustness and Artifact Tests
 
@@ -250,7 +278,7 @@ Tests:
 Status:
 
 - [x] Implement test-time corruption suite.
-- [ ] Compare supervised vs SSL robustness.
+- [x] Compare supervised vs SSL robustness.
 - [x] Create first robustness result table.
 
 ### Phase 6: Explainability Audit
@@ -411,16 +439,22 @@ Run real supervised baselines first, then launch SimCLR for enough epochs to com
 
 | Experiment ID | Method | Backbone | Split | Label budget | Accuracy | AUROC | F1 | ECE | Notes |
 |---|---|---|---|---:|---:|---:|---:|---:|---|
-| TBD | Supervised | ResNet-18 | Duplicate-aware | 100% | Pending | Pending | Pending | Pending | Baseline |
 | resnet18-supervised-exact-e1 | Supervised | ResNet-18 | Exact duplicate-aware | 100% | 0.9960 | 0.9997 | 0.9964 | 0.0304 | One epoch; suspiciously high, needs near-duplicate benchmark |
 | resnet18-supervised-phash-e1 | Supervised | ResNet-18 | pHash near-duplicate-aware | 100% | 0.9924 | 0.9994 | 0.9933 | 0.0183 | One epoch; still very high under stricter split |
 | efficientnet-b0-supervised-phash-e1 | Supervised | EfficientNet-B0 | pHash near-duplicate-aware | 100% | 0.9635 | 0.9972 | 0.9681 | 0.0266 | Strong but below ResNet-18 after one epoch |
 | vit-tiny-supervised-phash-e1 | Supervised | ViT-Tiny/16 | pHash near-duplicate-aware | 100% | 0.9421 | 0.9986 | 0.9457 | 0.0386 | High AUROC with conservative threshold behavior |
+| convnext-tiny-supervised-phash-e1 | Supervised | ConvNeXt-Tiny | pHash near-duplicate-aware | 100% | 0.8269 | 0.9565 | 0.8227 | 0.0446 | Under-trained after one epoch |
+| resnet18-supervised-phash-5pct-e1 | Supervised | ResNet-18 | pHash near-duplicate-aware | 5% | 0.8106 | 0.9734 | 0.7973 | 0.2356 | Low-label baseline |
+| resnet18-supervised-phash-10pct-e1 | Supervised | ResNet-18 | pHash near-duplicate-aware | 10% | 0.9427 | 0.9930 | 0.9463 | 0.2901 | Strong ranking, poor calibration |
+| resnet18-supervised-phash-25pct-e1 | Supervised | ResNet-18 | pHash near-duplicate-aware | 25% | 0.9320 | 0.9937 | 0.9356 | 0.0739 | Needs repeated seeds |
+| resnet18-supervised-phash-50pct-e1 | Supervised | ResNet-18 | pHash near-duplicate-aware | 50% | 0.9843 | 0.9992 | 0.9858 | 0.0278 | Near full-label performance |
 | smoke-001 | Supervised | ResNet-18 | Duplicate-aware | N/A | N/A | N/A | N/A | N/A | Runtime-only MPS smoke test; not a real result |
 | smoke-002 | SimCLR | ResNet-18 | Duplicate-aware train split | N/A | N/A | N/A | N/A | N/A | One-batch MPS smoke test; loss 4.1280 |
 | simclr-resnet18-phash-e1-linear-10pct-e1 | SimCLR + linear probe | ResNet-18 | pHash near-duplicate-aware | 10% | 0.6388 | 0.7781 | 0.5754 | 0.1055 | One-epoch SSL pretraining only; pipeline validation |
-| TBD | SimCLR + linear probe | ResNet-18 | Duplicate-aware | 5% | Pending | Pending | Pending | Pending | SSL low-label |
-| TBD | SimCLR + fine-tune | ResNet-18 | Duplicate-aware | 100% | Pending | Pending | Pending | Pending | SSL full-label |
+| simclr-resnet18-phash-e25-finetune-5pct-e1 | SimCLR + full fine-tune | ResNet-18 | pHash near-duplicate-aware | 5% | 0.5595 | 0.9367 | 0.3554 | 0.2145 | Longer SSL helps AUROC, but thresholded recall is poor |
+| simclr-resnet18-phash-e25-finetune-10pct-e1 | SimCLR + full fine-tune | ResNet-18 | pHash near-duplicate-aware | 10% | 0.9308 | 0.9711 | 0.9344 | 0.2250 | Close accuracy to supervised 10%, lower AUROC |
+| simclr-resnet18-phash-e25-finetune-25pct-e1 | SimCLR + full fine-tune | ResNet-18 | pHash near-duplicate-aware | 25% | 0.9138 | 0.9878 | 0.9169 | 0.0847 | Needs longer downstream tuning and repeated seeds |
+| simclr-resnet18-phash-e25-finetune-50pct-e1 | SimCLR + full fine-tune | ResNet-18 | pHash near-duplicate-aware | 50% | 0.9484 | 0.9893 | 0.9519 | 0.0577 | Stronger than one-epoch SSL probe, below supervised 50% |
 
 ### Robustness Results
 
@@ -435,6 +469,17 @@ Checkpoint: `runs/resnet18_supervised_exact_e1/best_model.pt`
 | Blur | 0.5562 | 0.8800 | 0.7135 | 0.4153 | Severe preprocessing sensitivity |
 | Downsample | 0.5562 | 0.8887 | 0.7135 | 0.4096 | Severe preprocessing sensitivity |
 | Gaussian noise | 0.7427 | 0.9885 | 0.8112 | 0.1194 | Accuracy drop with high ranking performance |
+
+### Cross-Model Robustness Snapshot
+
+| Model | Clean acc | Blur acc | Downsample acc | Noise acc | Main note |
+|---|---:|---:|---:|---:|---|
+| ResNet-18 | 0.9924 | 0.5645 | 0.5670 | 0.7728 | Best clean accuracy, brittle to blur/downsample |
+| EfficientNet-B0 | 0.9635 | 0.6589 | 0.7017 | 0.5746 | Strong clean AUROC, weak under noise |
+| ViT-Tiny/16 | 0.9421 | 0.9836 | 0.9899 | 0.9239 | Most robust to blur/downsample |
+| ConvNeXt-Tiny | 0.8269 | 0.8609 | 0.8571 | 0.8125 | Under-trained but stable |
+| SimCLR ResNet-18 10% linear probe | 0.6388 | 0.5437 | 0.5538 | 0.6973 | Pipeline validation only |
+| SimCLR ResNet-18 e25 50% fine-tune | 0.9484 | 0.5639 | 0.5670 | 0.8785 | Better noise robustness than supervised ResNet, still blur/downsample brittle |
 
 ### Failed Attempts
 
@@ -487,12 +532,12 @@ Every experiment should record:
 3. [x] Generate exact duplicate groups.
 4. [x] Generate duplicate-aware train/validation/test split.
 5. [x] Implement supervised baseline.
-6. [ ] Train ResNet-18 and EfficientNet-B0 baselines.
+6. [x] Train ResNet-18, EfficientNet-B0, ViT-Tiny, and ConvNeXt-Tiny baselines.
 7. [x] Implement SimCLR pretraining.
 8. [x] Run SimCLR smoke test on a small subset.
-9. [ ] Run full SimCLR pretraining.
+9. [x] Run full SimCLR pretraining.
 10. [ ] Fine-tune SSL encoder under 5%, 10%, 25%, 50%, and 100% labels.
-11. [ ] Compare against supervised baselines.
+11. [x] Compare against supervised baselines.
 12. [ ] Add robustness and XAI analysis.
 
 ## Current Decision Log

@@ -26,6 +26,14 @@ Initial architecture comparison on the pHash split shows ResNet-18 outperforming
 
 The first SimCLR run was intentionally short: one pretraining epoch and a 10% linear probe. Its AUROC was only 0.7781, which is not a failure of SSL yet. It establishes the pipeline and motivates longer SSL pretraining before comparing label efficiency.
 
+The 25-epoch SimCLR run reduced training loss from 3.3903 to 1.7324 and produced a useful downstream encoder, but the first full fine-tuning sweep still trails the supervised ImageNet-pretrained ResNet-18 baseline at matched label fractions. At 10% labels, SSL fine-tuning reached 0.9308 accuracy and 0.9711 AUROC versus supervised ResNet-18 at 0.9427 accuracy and 0.9930 AUROC. At 50% labels, SSL reached 0.9484 accuracy and 0.9893 AUROC versus supervised 0.9843 accuracy and 0.9992 AUROC. This is an important negative/neutral result for the manuscript: SSL is not automatically better without tuning, even though it may help robustness or calibration under some conditions.
+
+The cross-model robustness results are more nuanced than the clean metrics. ResNet-18 is strongest on clean accuracy but collapses under blur/downsampling. ViT-Tiny has lower clean accuracy but is far more stable under blur and downsample transformations. This may become a major manuscript finding: architecture choice changes robustness even when clean AUROC is uniformly high.
+
+The 25-epoch SimCLR 50% fine-tuned model improved Gaussian-noise accuracy compared with supervised ResNet-18 on the same pHash test split (0.8785 versus 0.7728), but it remained brittle to blur and downsampling (0.5639 and 0.5670 accuracy). This suggests the robustness claim should be transformation-specific rather than framed as SSL being broadly robust.
+
+The first one-epoch label-efficiency pass suggests supervised ImageNet-pretrained ResNet-18 is already strong with small label fractions, but low-label runs can be poorly calibrated. Repeated seeds and longer fine-tuning are needed before making final low-label claims.
+
 ## Important Caution
 
 The pHash audit found 38 cross-label near-duplicate groups. These must be inspected before making strong claims. They may indicate visually similar images, preprocessing collisions, annotation ambiguity, or actual label noise.

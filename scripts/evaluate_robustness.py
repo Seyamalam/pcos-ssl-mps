@@ -13,6 +13,7 @@ from torchvision import transforms
 
 from pcos_ssl.data.dataset import PCOSImageDataset
 from pcos_ssl.models.factory import create_classifier
+from pcos_ssl.models.ssl_classifier import EncoderClassifier
 from pcos_ssl.training.metrics import binary_classification_metrics
 from pcos_ssl.utils.runtime import configure_runtime
 
@@ -99,6 +100,21 @@ def robustness_transforms(image_size: int) -> dict[str, transforms.Compose]:
     }
 
 
+def load_model_from_checkpoint(checkpoint_path: Path, device) -> torch.nn.Module:
+    checkpoint = torch.load(checkpoint_path, map_location=device)
+    config = checkpoint.get("config", {})
+    backbone = checkpoint.get("backbone") or config.get("model", {}).get("backbone", "resnet18")
+    state_dict = checkpoint["model"]
+    if any(key.startswith("encoder.") for key in state_dict):
+        model = EncoderClassifier(backbone=backbone, num_classes=2, pretrained=False)
+    else:
+        model = create_classifier(backbone=backbone, num_classes=2, pretrained=False)
+    model = model.to(device)
+    model.load_state_dict(state_dict)
+    model.eval()
+    return model
+
+
 @torch.inference_mode()
 def evaluate_loader(model, loader, device) -> dict:
     y_true: list[int] = []
@@ -115,12 +131,7 @@ def evaluate_loader(model, loader, device) -> dict:
 def main() -> None:
     args = parse_args()
     runtime = configure_runtime(seed=42, cpu_threads=18)
-    checkpoint = torch.load(args.checkpoint, map_location=runtime.device)
-    config = checkpoint.get("config", {})
-    backbone = checkpoint.get("backbone") or config.get("model", {}).get("backbone", "resnet18")
-    model = create_classifier(backbone=backbone, num_classes=2, pretrained=False).to(runtime.device)
-    model.load_state_dict(checkpoint["model"])
-    model.eval()
+    model = load_model_from_checkpoint(args.checkpoint, runtime.device)
 
     results = {}
     for name, transform in robustness_transforms(args.image_size).items():
