@@ -13,9 +13,32 @@ class PCOSImageDataset(Dataset):
         self.transform = transform
 
     @classmethod
-    def from_split_csv(cls, split_csv: Path, split: str, transform=None) -> "PCOSImageDataset":
+    def from_split_csv(
+        cls,
+        split_csv: Path,
+        split: str,
+        transform=None,
+        label_fraction: float = 1.0,
+        seed: int = 42,
+    ) -> "PCOSImageDataset":
         frame = pd.read_csv(split_csv)
         frame = frame[frame["split"] == split].reset_index(drop=True)
+        if split == "train" and label_fraction < 1.0:
+            if not 0.0 < label_fraction <= 1.0:
+                raise ValueError("label_fraction must be in (0, 1].")
+            groups = (
+                frame.groupby("exact_group_id")
+                .agg(label=("label", "first"), group_size=("image_id", "size"))
+                .reset_index()
+            )
+            sampled_groups = (
+                groups.groupby("label", group_keys=False)
+                .sample(frac=label_fraction, random_state=seed)
+                .reset_index(drop=True)
+            )
+            frame = frame[frame["exact_group_id"].isin(sampled_groups["exact_group_id"])].reset_index(
+                drop=True
+            )
         return cls(frame=frame, transform=transform)
 
     def __len__(self) -> int:

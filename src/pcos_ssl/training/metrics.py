@@ -13,6 +13,27 @@ from sklearn.metrics import (
 )
 
 
+def expected_calibration_error(
+    y_true: np.ndarray,
+    y_prob: np.ndarray,
+    n_bins: int = 15,
+) -> float:
+    y_pred = (y_prob >= 0.5).astype(int)
+    confidence = np.maximum(y_prob, 1.0 - y_prob)
+    correctness = (y_pred == y_true).astype(float)
+    bin_edges = np.linspace(0.0, 1.0, n_bins + 1)
+    ece = 0.0
+    for lower, upper in zip(bin_edges[:-1], bin_edges[1:]):
+        in_bin = (confidence > lower) & (confidence <= upper)
+        if not np.any(in_bin):
+            continue
+        prop = float(np.mean(in_bin))
+        acc = float(np.mean(correctness[in_bin]))
+        conf = float(np.mean(confidence[in_bin]))
+        ece += prop * abs(acc - conf)
+    return ece
+
+
 def binary_classification_metrics(
     y_true: list[int], y_prob: list[float]
 ) -> dict[str, float | int | None]:
@@ -31,6 +52,7 @@ def binary_classification_metrics(
         "precision": float(precision_score(y_true_array, y_pred_array, zero_division=0)),
         "recall_sensitivity": float(recall_score(y_true_array, y_pred_array, zero_division=0)),
         "specificity": float(tn / (tn + fp)) if (tn + fp) else 0.0,
+        "ece": expected_calibration_error(y_true_array, y_prob_array),
         "tn": int(tn),
         "fp": int(fp),
         "fn": int(fn),

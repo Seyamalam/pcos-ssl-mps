@@ -395,16 +395,32 @@ Run real supervised baselines first, then launch SimCLR for enough epochs to com
 | Random image split | Pending | Pending | Pending | No | Not recommended except as leakage demonstration |
 | Exact duplicate group split | 8,228 | 1,803 | 1,753 | Exact duplicates controlled | Done |
 | Near-duplicate group split | Pending | Pending | Pending | Exact + near duplicates controlled | Planned |
+| pHash near-duplicate group split | 7,429 | 1,584 | 1,589 | Exact + pHash near duplicates controlled; cross-label near groups excluded | Done |
 
 ### Model Results
 
 | Experiment ID | Method | Backbone | Split | Label budget | Accuracy | AUROC | F1 | ECE | Notes |
 |---|---|---|---|---:|---:|---:|---:|---:|---|
 | TBD | Supervised | ResNet-18 | Duplicate-aware | 100% | Pending | Pending | Pending | Pending | Baseline |
+| resnet18-supervised-exact-e1 | Supervised | ResNet-18 | Exact duplicate-aware | 100% | 0.9960 | 0.9997 | 0.9964 | 0.0304 | One epoch; suspiciously high, needs near-duplicate benchmark |
 | smoke-001 | Supervised | ResNet-18 | Duplicate-aware | N/A | N/A | N/A | N/A | N/A | Runtime-only MPS smoke test; not a real result |
 | smoke-002 | SimCLR | ResNet-18 | Duplicate-aware train split | N/A | N/A | N/A | N/A | N/A | One-batch MPS smoke test; loss 4.1280 |
 | TBD | SimCLR + linear probe | ResNet-18 | Duplicate-aware | 5% | Pending | Pending | Pending | Pending | SSL low-label |
 | TBD | SimCLR + fine-tune | ResNet-18 | Duplicate-aware | 100% | Pending | Pending | Pending | Pending | SSL full-label |
+
+### Robustness Results
+
+Checkpoint: `runs/resnet18_supervised_exact_e1/best_model.pt`
+
+| Test condition | Accuracy | AUROC | F1 | ECE | Note |
+|---|---:|---:|---:|---:|---|
+| Clean resize | 0.9960 | 0.9997 | 0.9964 | 0.0304 | Main exact-duplicate-aware test result |
+| Center crop | 0.7895 | 0.9788 | 0.8391 | 0.1372 | Large accuracy drop |
+| Low contrast | 0.9606 | 0.9978 | 0.9656 | 0.0400 | Moderate drop |
+| High contrast | 0.9663 | 0.9995 | 0.9686 | 0.0166 | Moderate drop |
+| Blur | 0.5562 | 0.8800 | 0.7135 | 0.4153 | Severe preprocessing sensitivity |
+| Downsample | 0.5562 | 0.8887 | 0.7135 | 0.4096 | Severe preprocessing sensitivity |
+| Gaussian noise | 0.7427 | 0.9885 | 0.8112 | 0.1194 | Accuracy drop with high ranking performance |
 
 ### Failed Attempts
 
@@ -473,6 +489,8 @@ Every experiment should record:
 | 2026-05-21 | Treat duplicates as central methodology issue | Local audit found 1,956 exact duplicate groups |
 | 2026-05-21 | Start with SimCLR before BYOL/DINO | Simpler to debug and easier to explain |
 | 2026-05-21 | Use duplicate-aware split as main benchmark | Prevents inflated test performance |
+| 2026-05-21 | Keep raw dataset and Grad-CAM image derivatives out of GitHub | Avoid publishing Kaggle image files or visual derivatives |
+| 2026-05-21 | Add pHash near-duplicate split as stricter benchmark | pHash threshold 4 found 38 cross-label near-duplicate groups |
 
 ## Notes to Update Later
 

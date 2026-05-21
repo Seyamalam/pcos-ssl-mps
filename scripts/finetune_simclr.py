@@ -12,21 +12,22 @@ from torch.utils.data import DataLoader
 
 from pcos_ssl.data.dataset import PCOSImageDataset
 from pcos_ssl.data.transforms import build_supervised_transforms
-from pcos_ssl.models.factory import create_classifier
+from pcos_ssl.models.ssl_classifier import EncoderClassifier, load_simclr_encoder
 from pcos_ssl.training.loops import evaluate, train_one_epoch
 from pcos_ssl.utils.runtime import configure_runtime
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Train a supervised PCOS classifier baseline.")
-    parser.add_argument("--config", type=Path, default=Path("configs/baseline.yaml"))
+    parser = argparse.ArgumentParser(description="Fine-tune or linear-probe a SimCLR encoder.")
+    parser.add_argument("--config", type=Path, default=Path("configs/finetune_simclr.yaml"))
+    parser.add_argument("--checkpoint", type=Path, default=None)
     parser.add_argument("--epochs", type=int, default=None)
-    parser.add_argument("--pretrained", action=argparse.BooleanOptionalAction, default=None)
+    parser.add_argument("--label-fraction", type=float, default=1.0)
+    parser.add_argument("--freeze-encoder", action=argparse.BooleanOptionalAction, default=None)
     parser.add_argument("--max-train-batches", type=int, default=None)
     parser.add_argument("--max-val-batches", type=int, default=None)
     parser.add_argument("--max-test-batches", type=int, default=None)
-    parser.add_argument("--label-fraction", type=float, default=1.0)
-    parser.add_argument("--output-dir", type=Path, default=Path("runs/supervised_smoke"))
+    parser.add_argument("--output-dir", type=Path, default=Path("runs/simclr_finetune_smoke"))
     return parser.parse_args()
 
 
@@ -53,13 +54,13 @@ def main() -> None:
         seed=int(config["seed"]),
         cpu_threads=int(config["runtime"].get("cpu_threads", 18)),
     )
-
     epochs = args.epochs if args.epochs is not None else int(config["training"]["epochs"])
-    pretrained = (
-        args.pretrained
-        if args.pretrained is not None
-        else bool(config["model"].get("pretrained", True))
+    freeze_encoder = (
+        args.freeze_encoder
+        if args.freeze_encoder is not None
+        else bool(config["model"].get("freeze_encoder", False))
     )
+    checkpoint_path = args.checkpoint or Path(config["model"]["checkpoint"])
 
     train_transform, eval_transform = build_supervised_transforms(int(config["data"]["image_size"]))
     split_csv = Path(config["data"]["split_csv"])
@@ -79,14 +80,18 @@ def main() -> None:
     val_loader = make_loader(val_dataset, batch_size, shuffle=False, num_workers=num_workers)
     test_loader = make_loader(test_dataset, batch_size, shuffle=False, num_workers=num_workers)
 
-    model = create_classifier(
+    model = EncoderClassifier(
         backbone=str(config["model"]["backbone"]),
         num_classes=2,
-        pretrained=pretrained,
-    ).to(runtime.device)
+        pretrained=False,
+        freeze_encoder=freeze_encoder,
+    )
+    load_simclr_encoder(model, str(checkpoint_path))
+    model = model.to(runtime.device)
+
     criterion = nn.CrossEntropyLoss()
     optimizer = torch.optim.AdamW(
-        model.parameters(),
+        [parameter for parameter in model.parameters() if parameter.requires_grad],
         lr=float(config["training"]["learning_rate"]),
         weight_decay=float(config["training"]["weight_decay"]),
     )
@@ -96,43 +101,26 @@ def main() -> None:
         f"Runtime: torch={runtime.torch_version}, device={runtime.device_name}, "
         f"cpu_threads={runtime.cpu_threads}, train={len(train_dataset):,}, "
         f"val={len(val_dataset):,}, test={len(test_dataset):,}, "
-        f"label_fraction={args.label_fraction}"
+        f"label_fraction={args.label_fraction}, freeze_encoder={freeze_encoder}"
     )
 
-    history = []
     args.output_dir.mkdir(parents=True, exist_ok=True)
+    history = []
     best_score = float("-inf")
     best_epoch = None
     best_checkpoint_path = args.output_dir / "best_model.pt"
+
     for epoch in range(1, epochs + 1):
         train_loss = train_one_epoch(
-            model,
-            train_loader,
-            criterion,
-            optimizer,
-            runtime.device,
-            args.max_train_batches,
+            model, train_loader, criterion, optimizer, runtime.device, args.max_train_batches
         )
         val_loss, val_metrics = evaluate(
-            model,
-            val_loader,
-            criterion,
-            runtime.device,
-            args.max_val_batches,
+            model, val_loader, criterion, runtime.device, args.max_val_batches
         )
-        row = {
-            "epoch": epoch,
-            "train_loss": train_loss,
-            "val_loss": val_loss,
-            **val_metrics,
-        }
+        row = {"epoch": epoch, "train_loss": train_loss, "val_loss": val_loss, **val_metrics}
         history.append(row)
         console.print(row)
-        score = val_metrics.get("auroc")
-        if score is None:
-            score = val_metrics.get("balanced_accuracy")
-        if score is None:
-            score = -val_loss
+        score = val_metrics.get("auroc") or val_metrics.get("balanced_accuracy") or -val_loss
         if score is not None and float(score) > best_score:
             best_score = float(score)
             best_epoch = epoch
@@ -143,7 +131,8 @@ def main() -> None:
                     "epoch": epoch,
                     "best_score": best_score,
                     "label_fraction": args.label_fraction,
-                    "backbone": str(config["model"]["backbone"]),
+                    "freeze_encoder": freeze_encoder,
+                    "simclr_checkpoint": str(checkpoint_path),
                 },
                 best_checkpoint_path,
             )
@@ -152,22 +141,16 @@ def main() -> None:
         checkpoint = torch.load(best_checkpoint_path, map_location=runtime.device)
         model.load_state_dict(checkpoint["model"])
     test_loss, test_metrics = evaluate(
-        model,
-        test_loader,
-        criterion,
-        runtime.device,
-        args.max_test_batches,
+        model, test_loader, criterion, runtime.device, args.max_test_batches
     )
     test_result = {"best_epoch": best_epoch, "test_loss": test_loss, **test_metrics}
 
-    metrics_path = args.output_dir / "metrics.json"
-    test_metrics_path = args.output_dir / "test_metrics.json"
-    with metrics_path.open("w", encoding="utf-8") as handle:
+    with (args.output_dir / "metrics.json").open("w", encoding="utf-8") as handle:
         json.dump(history, handle, indent=2)
-    with test_metrics_path.open("w", encoding="utf-8") as handle:
+    with (args.output_dir / "test_metrics.json").open("w", encoding="utf-8") as handle:
         json.dump(test_result, handle, indent=2)
-    console.print(f"Wrote {metrics_path}")
-    console.print(f"Wrote {test_metrics_path}")
+    console.print(f"Wrote {args.output_dir / 'metrics.json'}")
+    console.print(f"Wrote {args.output_dir / 'test_metrics.json'}")
     console.print(f"Wrote {best_checkpoint_path}")
 
 

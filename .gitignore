@@ -8,6 +8,7 @@ __pycache__/
 checkpoints/
 runs/
 reports/figures/
+reports/gradcam*/
 *.pt
 *.pth
 *.ckpt
