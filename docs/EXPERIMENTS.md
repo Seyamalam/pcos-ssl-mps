@@ -133,6 +133,17 @@ Thresholds are selected on validation predictions and then applied unchanged to 
 
 Interpretation: validation-selected thresholding materially changes the low-label comparison. It does not change AUROC, but it exposes that the default 0.5 threshold was suppressing sensitivity, especially for SSL fine-tuned models.
 
+## Repeated-Seed Summary
+
+Three-seed summary for the first manuscript-grade repeat block. Seeds are 42, 7, and 123. All runs use one downstream epoch, the pHash near-duplicate-aware split, and ResNet-18.
+
+| Method | Label fraction | Accuracy mean | Accuracy std | AUROC mean | AUROC std | Tuned accuracy mean | Tuned accuracy std | Tuned sensitivity mean | Interpretation |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---|
+| SimCLR e25 fine-tune | 0.10 | 0.9366 | 0.0214 | 0.9784 | 0.0072 | 0.9392 | 0.0176 | 0.9201 | Slight mean accuracy edge over supervised, but needs longer tuning and more seeds. |
+| Supervised ResNet-18 | 0.10 | 0.9270 | 0.0137 | 0.9766 | 0.0153 | 0.9366 | 0.0249 | 0.9044 | Competitive and variable in low-label setting. |
+| SimCLR e25 fine-tune | 0.25 | 0.9211 | 0.0064 | 0.9859 | 0.0020 | 0.9452 | 0.0104 | 0.9332 | Stable but below supervised at 25%. |
+| Supervised ResNet-18 | 0.25 | 0.9360 | 0.0058 | 0.9925 | 0.0044 | 0.9543 | 0.0245 | 0.9537 | Stronger mean performance, threshold-selected results have higher variance. |
+
 ## Failed or Non-Paper Runs
 
 | Date | Run | What happened | Decision |

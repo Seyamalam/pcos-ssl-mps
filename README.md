@@ -496,6 +496,17 @@ Thresholds are selected on the validation split only, then locked before test ev
 | SimCLR e25 fine-tune | 25% | 0.9138 | 0.9572 | 0.8466 | 0.9395 | 0.9799 | 0.9878 |
 | SimCLR e25 fine-tune | 50% | 0.9484 | 0.9597 | 0.9082 | 0.9283 | 1.0000 | 0.9893 |
 
+### Repeated-Seed Snapshot
+
+Seeds: 42, 7, and 123. All runs use one downstream epoch on the pHash near-duplicate-aware split.
+
+| Method | Label budget | Accuracy mean +/- std | AUROC mean +/- std | Tuned accuracy mean +/- std | Tuned sensitivity mean |
+|---|---:|---:|---:|---:|---:|
+| SimCLR e25 fine-tune | 10% | 0.9366 +/- 0.0214 | 0.9784 +/- 0.0072 | 0.9392 +/- 0.0176 | 0.9201 |
+| Supervised ResNet-18 | 10% | 0.9270 +/- 0.0137 | 0.9766 +/- 0.0153 | 0.9366 +/- 0.0249 | 0.9044 |
+| SimCLR e25 fine-tune | 25% | 0.9211 +/- 0.0064 | 0.9859 +/- 0.0020 | 0.9452 +/- 0.0104 | 0.9332 |
+| Supervised ResNet-18 | 25% | 0.9360 +/- 0.0058 | 0.9925 +/- 0.0044 | 0.9543 +/- 0.0245 | 0.9537 |
+
 ### Failed Attempts
 
 | Date | Attempt | What failed | Likely reason | Decision |

@@ -6,7 +6,7 @@ Working queue for the PCOS SSL manuscript experiments.
 
 1. Run repeated seeds for the current supervised and SimCLR label-efficiency experiments.
    - Fractions: 5%, 10%, 25%, 50%.
-   - Minimum seeds: 3.
+   - Minimum seeds: 3. Completed for 10% and 25%.
    - Target seeds: 5 if runtime allows.
    - Report mean, standard deviation, and confidence intervals.
 
