@@ -45,6 +45,8 @@ Every run should be recorded here, including smoke tests and failed attempts. Th
 | `convnext_tiny_supervised_phash_e1` | ConvNeXt-Tiny | pHash near-duplicate-aware | 1 | 1.0 | 0.8269 | 0.9565 | 0.8227 | 0.0446 | Under-trained after one epoch; included as modern CNN comparison point. |
 | `resnet18_supervised_phash_5pct_e1` | ResNet-18 | pHash near-duplicate-aware | 1 | 0.05 | 0.8106 | 0.9734 | 0.7973 | 0.2356 | Low-label supervised baseline; high AUROC but poor calibration. |
 | `resnet18_supervised_phash_10pct_e1` | ResNet-18 | pHash near-duplicate-aware | 1 | 0.10 | 0.9427 | 0.9930 | 0.9463 | 0.2901 | Strong ranking; poor calibration after one epoch. |
+| `resnet18_supervised_phash_10pct_e5` | ResNet-18 | pHash near-duplicate-aware | 5 | 0.10 | 0.9648 | 0.9982 | 0.9676 | 0.0189 | Longer downstream tuning improves ranking and calibration. |
+| `resnet18_supervised_phash_10pct_e10` | ResNet-18 | pHash near-duplicate-aware | 10 | 0.10 | 0.9855 | 0.9989 | 0.9873 | 0.0188 | Strongest 10% label result so far. |
 | `resnet18_supervised_phash_25pct_e1` | ResNet-18 | pHash near-duplicate-aware | 1 | 0.25 | 0.9320 | 0.9937 | 0.9356 | 0.0739 | Slightly below 10% in thresholded accuracy; needs repeated seeds. |
 | `resnet18_supervised_phash_50pct_e1` | ResNet-18 | pHash near-duplicate-aware | 1 | 0.50 | 0.9843 | 0.9992 | 0.9858 | 0.0278 | Approaches full-label performance after one epoch. |
 
@@ -102,6 +104,8 @@ All models below use the pHash near-duplicate-aware test split.
 | `simclr_resnet18_phash_e1_linear_10pct_e1` | SimCLR ResNet-18, 1 epoch | Linear probe | pHash near-duplicate-aware | 0.1 | 1 | 0.6388 | 0.7781 | 0.5754 | 0.1055 | Not competitive; confirms longer SSL pretraining is needed. |
 | `simclr_resnet18_phash_e25_finetune_05pct_e1` | SimCLR ResNet-18, 25 epochs | Full fine-tune | pHash near-duplicate-aware | 0.05 | 1 | 0.5595 | 0.9367 | 0.3554 | 0.2145 | AUROC improved vs short SSL, but thresholded recall is poor. |
 | `simclr_resnet18_phash_e25_finetune_10pct_e1` | SimCLR ResNet-18, 25 epochs | Full fine-tune | pHash near-duplicate-aware | 0.10 | 1 | 0.9308 | 0.9711 | 0.9344 | 0.2250 | Accuracy approaches supervised 10%, but AUROC trails. |
+| `simclr_resnet18_phash_e25_finetune_10pct_e5` | SimCLR ResNet-18, 25 epochs | Full fine-tune | pHash near-duplicate-aware | 0.10 | 5 | 0.9308 | 0.9893 | 0.9344 | 0.0567 | More downstream epochs improve ranking and calibration, but default thresholded accuracy remains flat. |
+| `simclr_resnet18_phash_e25_finetune_10pct_e10` | SimCLR ResNet-18, 25 epochs | Full fine-tune | pHash near-duplicate-aware | 0.10 | 10 | 0.9736 | 0.9975 | 0.9759 | 0.0488 | Large downstream gain; still below supervised ResNet-18 10-epoch accuracy. |
 | `simclr_resnet18_phash_e25_finetune_25pct_e1` | SimCLR ResNet-18, 25 epochs | Full fine-tune | pHash near-duplicate-aware | 0.25 | 1 | 0.9138 | 0.9878 | 0.9169 | 0.0847 | Below supervised 25% in this first pass. |
 | `simclr_resnet18_phash_e25_finetune_50pct_e1` | SimCLR ResNet-18, 25 epochs | Full fine-tune | pHash near-duplicate-aware | 0.50 | 1 | 0.9484 | 0.9893 | 0.9519 | 0.0577 | Stronger than short SSL, but below supervised 50%. |
 
@@ -124,14 +128,33 @@ Thresholds are selected on validation predictions and then applied unchanged to 
 |---|---:|---:|---:|---:|---:|---:|---:|---:|
 | `resnet18_supervised_phash_5pct_e1` | 0.05 | 0.4349 | 0.8106 | 0.9062 | 0.6629 | 0.9406 | 0.8621 | 0.9734 |
 | `resnet18_supervised_phash_10pct_e1` | 0.10 | 0.4580 | 0.9427 | 0.9654 | 0.8981 | 0.9474 | 0.9885 | 0.9930 |
+| `resnet18_supervised_phash_10pct_e5` | 0.10 | 0.1783 | 0.9648 | 0.9818 | 0.9373 | 0.9832 | 0.9799 | 0.9982 |
+| `resnet18_supervised_phash_10pct_e10` | 0.10 | 0.7567 | 0.9855 | 0.9912 | 0.9989 | 0.9933 | 0.9885 | 0.9989 |
 | `resnet18_supervised_phash_25pct_e1` | 0.25 | 0.2482 | 0.9320 | 0.9547 | 0.8791 | 0.9351 | 0.9799 | 0.9937 |
 | `resnet18_supervised_phash_50pct_e1` | 0.50 | 0.3242 | 0.9843 | 0.9899 | 0.9720 | 0.9821 | 1.0000 | 0.9992 |
 | `simclr_resnet18_phash_e25_finetune_05pct_e1` | 0.05 | 0.3389 | 0.5595 | 0.8156 | 0.2161 | 0.7413 | 0.9109 | 0.9367 |
 | `simclr_resnet18_phash_e25_finetune_10pct_e1` | 0.10 | 0.4211 | 0.9308 | 0.9534 | 0.8768 | 0.9171 | 1.0000 | 0.9711 |
+| `simclr_resnet18_phash_e25_finetune_10pct_e5` | 0.10 | 0.3493 | 0.9308 | 0.9559 | 0.8768 | 0.9351 | 0.9828 | 0.9893 |
+| `simclr_resnet18_phash_e25_finetune_10pct_e10` | 0.10 | 0.1947 | 0.9736 | 0.9666 | 0.9530 | 0.9922 | 0.9339 | 0.9975 |
 | `simclr_resnet18_phash_e25_finetune_25pct_e1` | 0.25 | 0.1542 | 0.9138 | 0.9572 | 0.8466 | 0.9395 | 0.9799 | 0.9878 |
 | `simclr_resnet18_phash_e25_finetune_50pct_e1` | 0.50 | 0.4668 | 0.9484 | 0.9597 | 0.9082 | 0.9283 | 1.0000 | 0.9893 |
 
 Interpretation: validation-selected thresholding materially changes the low-label comparison. It does not change AUROC, but it exposes that the default 0.5 threshold was suppressing sensitivity, especially for SSL fine-tuned models.
+
+## Downstream Epoch Sensitivity
+
+All rows use 10% labels, seed 42, the pHash near-duplicate-aware split, and ResNet-18. Tuned metrics use the balanced-accuracy-selected validation threshold.
+
+| Method | Epochs | Default acc | AUROC | Tuned acc | Tuned sensitivity | Tuned specificity | Interpretation |
+|---|---:|---:|---:|---:|---:|---:|---|
+| Supervised ImageNet ResNet-18 | 1 | 0.9427 | 0.9930 | 0.9654 | 0.9474 | 0.9885 | Strong low-label starting point. |
+| Supervised ImageNet ResNet-18 | 5 | 0.9648 | 0.9982 | 0.9818 | 0.9832 | 0.9799 | Better sensitivity and calibration than one epoch. |
+| Supervised ImageNet ResNet-18 | 10 | 0.9855 | 0.9989 | 0.9912 | 0.9933 | 0.9885 | Best 10% label model so far. |
+| SimCLR e25 fine-tune | 1 | 0.9308 | 0.9711 | 0.9534 | 0.9171 | 1.0000 | Competitive accuracy but weaker ranking. |
+| SimCLR e25 fine-tune | 5 | 0.9308 | 0.9893 | 0.9559 | 0.9351 | 0.9828 | AUROC improves; default threshold remains conservative. |
+| SimCLR e25 fine-tune | 10 | 0.9736 | 0.9975 | 0.9666 | 0.9922 | 0.9339 | Strong sensitivity after tuning, but specificity tradeoff is larger. |
+
+Interpretation: longer downstream fine-tuning is mandatory before making SSL claims. SimCLR catches up substantially by 10 epochs, but the supervised ResNet-18 baseline remains stronger in this 10% seed-42 comparison.
 
 ## Repeated-Seed Summary
 

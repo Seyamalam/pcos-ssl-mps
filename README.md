@@ -248,6 +248,19 @@ Label budgets:
 | 50% | ResNet-18: acc 0.9843, AUROC 0.9992 | SimCLR e25 full fine-tune: acc 0.9484, AUROC 0.9893 | Supervised still stronger after one epoch |
 | 100% | Pending | Pending | Full-label comparison |
 
+10% downstream epoch sensitivity:
+
+| Method | Epochs | Default acc | AUROC | Tuned acc | Tuned sensitivity | Tuned specificity | Current read |
+|---|---:|---:|---:|---:|---:|---:|---|
+| Supervised ResNet-18 | 1 | 0.9427 | 0.9930 | 0.9654 | 0.9474 | 0.9885 | Strong one-epoch baseline. |
+| Supervised ResNet-18 | 5 | 0.9648 | 0.9982 | 0.9818 | 0.9832 | 0.9799 | Longer tuning improves sensitivity and ranking. |
+| Supervised ResNet-18 | 10 | 0.9855 | 0.9989 | 0.9912 | 0.9933 | 0.9885 | Best 10% label result so far. |
+| SimCLR e25 fine-tune | 1 | 0.9308 | 0.9711 | 0.9534 | 0.9171 | 1.0000 | Competitive but under-tuned. |
+| SimCLR e25 fine-tune | 5 | 0.9308 | 0.9893 | 0.9559 | 0.9351 | 0.9828 | AUROC improves with more epochs. |
+| SimCLR e25 fine-tune | 10 | 0.9736 | 0.9975 | 0.9666 | 0.9922 | 0.9339 | Sensitivity becomes strong, but specificity tradeoff appears. |
+
+Interpretation: the one-epoch label-efficiency table was not enough to judge downstream behavior. SimCLR improves substantially with longer fine-tuning, but supervised ImageNet-pretrained ResNet-18 is currently the strongest 10% label model after 10 epochs.
+
 Fine-tuning modes:
 
 - Linear probe: freeze encoder, train classifier head.
@@ -562,9 +575,10 @@ Every experiment should record:
 7. [x] Implement SimCLR pretraining.
 8. [x] Run SimCLR smoke test on a small subset.
 9. [x] Run full SimCLR pretraining.
-10. [ ] Fine-tune SSL encoder under 5%, 10%, 25%, 50%, and 100% labels.
-11. [x] Compare against supervised baselines.
-12. [ ] Add robustness and XAI analysis.
+10. [x] Fine-tune SSL encoder under 5%, 10%, 25%, and 50% labels.
+11. [ ] Add 100% SSL fine-tuning comparison.
+12. [x] Compare against supervised baselines.
+13. [ ] Add robustness severity sweeps and XAI analysis.
 
 ## Current Decision Log
 

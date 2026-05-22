@@ -1,0 +1,7 @@
+method,label_fraction,downstream_epochs,run_id,default_accuracy,auroc,selected_threshold,selected_accuracy,selected_sensitivity,selected_specificity,interpretation
+Supervised ResNet-18,0.10,1,resnet18_supervised_phash_10pct_e1,0.942731,0.992991,0.457966,0.965387,0.947368,0.988506,Strong one-epoch baseline with threshold calibration benefit.
+Supervised ResNet-18,0.10,5,resnet18_supervised_phash_10pct_e5,0.964758,0.998208,0.178297,0.981750,0.983203,0.979885,Longer supervised tuning improves both ranking and sensitivity.
+Supervised ResNet-18,0.10,10,resnet18_supervised_phash_10pct_e10,0.985525,0.998874,0.756713,0.991189,0.993281,0.988506,Best 10 percent label result so far; supervised is very strong with enough epochs.
+SimCLR e25 fine-tune,0.10,1,simclr_resnet18_phash_e25_finetune_10pct_e1,0.930774,0.971110,0.421118,0.953430,0.917133,1.000000,Competitive accuracy but weaker AUROC after one epoch.
+SimCLR e25 fine-tune,0.10,5,simclr_resnet18_phash_e25_finetune_10pct_e5,0.930774,0.989336,0.349284,0.955947,0.935050,0.982759,Ranking improves with more epochs; thresholded accuracy changes modestly.
+SimCLR e25 fine-tune,0.10,10,simclr_resnet18_phash_e25_finetune_10pct_e10,0.973568,0.997480,0.194700,0.966646,0.992161,0.933908,Large AUROC and sensitivity gain, but selected-threshold specificity drops.

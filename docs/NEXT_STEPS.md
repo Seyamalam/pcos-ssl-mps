@@ -12,7 +12,8 @@ Working queue for the PCOS SSL manuscript experiments.
 
 2. Extend downstream fine-tuning beyond one epoch.
    - Start with ResNet-18 supervised and SimCLR e25 fine-tune at 10% and 50%.
-   - Compare 1, 5, 10, and 25 downstream epochs.
+   - Compared 1, 5, and 10 downstream epochs at 10% labels for supervised ResNet-18 and SimCLR e25.
+   - Next compare 1, 5, 10, and 25 downstream epochs at 50% labels.
    - Watch calibration, not just accuracy/AUROC.
 
 3. Extend validation-selected threshold analysis.
@@ -38,6 +39,8 @@ Working queue for the PCOS SSL manuscript experiments.
 ## Current Interpretation
 
 The first pass does not yet show SSL superiority. Supervised ImageNet-pretrained ResNet-18 remains very strong under the pHash near-duplicate-aware split, even at low label fractions. The useful manuscript angle is more subtle: strict leakage control, label-efficiency behavior, calibration failure modes, transformation-specific robustness, and explanation stability.
+
+The 10% downstream epoch-sensitivity block shows SimCLR improves strongly with longer fine-tuning, but supervised ResNet-18 is currently best at 10 epochs. This makes the next scientific move a 50% epoch-sensitivity run plus confidence intervals, not another one-epoch model leaderboard.
 
 ## Blockers To Resolve
 
