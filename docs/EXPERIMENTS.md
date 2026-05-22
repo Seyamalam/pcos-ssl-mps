@@ -49,6 +49,9 @@ Every run should be recorded here, including smoke tests and failed attempts. Th
 | `resnet18_supervised_phash_10pct_e10` | ResNet-18 | pHash near-duplicate-aware | 10 | 0.10 | 0.9855 | 0.9989 | 0.9873 | 0.0188 | Strongest 10% label result so far. |
 | `resnet18_supervised_phash_25pct_e1` | ResNet-18 | pHash near-duplicate-aware | 1 | 0.25 | 0.9320 | 0.9937 | 0.9356 | 0.0739 | Slightly below 10% in thresholded accuracy; needs repeated seeds. |
 | `resnet18_supervised_phash_50pct_e1` | ResNet-18 | pHash near-duplicate-aware | 1 | 0.50 | 0.9843 | 0.9992 | 0.9858 | 0.0278 | Approaches full-label performance after one epoch. |
+| `resnet18_supervised_phash_50pct_e5` | ResNet-18 | pHash near-duplicate-aware | 5 | 0.50 | 0.9950 | 0.9995 | 0.9955 | 0.0073 | Best 50% supervised checkpoint by tuned operating point. |
+| `resnet18_supervised_phash_50pct_e10` | ResNet-18 | pHash near-duplicate-aware | 10 | 0.50 | 0.9906 | 0.9991 | 0.9916 | 0.0068 | Still excellent, but below the 5-epoch checkpoint. |
+| `resnet18_supervised_phash_50pct_e25` | ResNet-18 | pHash near-duplicate-aware | 25 | 0.50 | 0.9943 | 0.9991 | 0.9950 | 0.0012 | Saturated; extra epochs do not improve selected-threshold result. |
 
 ## Robustness Results
 
@@ -108,6 +111,9 @@ All models below use the pHash near-duplicate-aware test split.
 | `simclr_resnet18_phash_e25_finetune_10pct_e10` | SimCLR ResNet-18, 25 epochs | Full fine-tune | pHash near-duplicate-aware | 0.10 | 10 | 0.9736 | 0.9975 | 0.9759 | 0.0488 | Large downstream gain; still below supervised ResNet-18 10-epoch accuracy. |
 | `simclr_resnet18_phash_e25_finetune_25pct_e1` | SimCLR ResNet-18, 25 epochs | Full fine-tune | pHash near-duplicate-aware | 0.25 | 1 | 0.9138 | 0.9878 | 0.9169 | 0.0847 | Below supervised 25% in this first pass. |
 | `simclr_resnet18_phash_e25_finetune_50pct_e1` | SimCLR ResNet-18, 25 epochs | Full fine-tune | pHash near-duplicate-aware | 0.50 | 1 | 0.9484 | 0.9893 | 0.9519 | 0.0577 | Stronger than short SSL, but below supervised 50%. |
+| `simclr_resnet18_phash_e25_finetune_50pct_e5` | SimCLR ResNet-18, 25 epochs | Full fine-tune | pHash near-duplicate-aware | 0.50 | 5 | 0.9622 | 0.9981 | 0.9652 | 0.0284 | Ranking improves sharply; default threshold still lags tuned operating point. |
+| `simclr_resnet18_phash_e25_finetune_50pct_e10` | SimCLR ResNet-18, 25 epochs | Full fine-tune | pHash near-duplicate-aware | 0.50 | 10 | 0.9704 | 0.9991 | 0.9743 | 0.0197 | Best 50% SimCLR validation-selected operating point. |
+| `simclr_resnet18_phash_e25_finetune_50pct_e25` | SimCLR ResNet-18, 25 epochs | Full fine-tune | pHash near-duplicate-aware | 0.50 | 25 | 0.9943 | 0.9992 | 0.9950 | 0.0088 | Default accuracy catches supervised, but tuned threshold sacrifices specificity. |
 
 ## Label-Efficiency Comparison
 
@@ -132,12 +138,18 @@ Thresholds are selected on validation predictions and then applied unchanged to 
 | `resnet18_supervised_phash_10pct_e10` | 0.10 | 0.7567 | 0.9855 | 0.9912 | 0.9989 | 0.9933 | 0.9885 | 0.9989 |
 | `resnet18_supervised_phash_25pct_e1` | 0.25 | 0.2482 | 0.9320 | 0.9547 | 0.8791 | 0.9351 | 0.9799 | 0.9937 |
 | `resnet18_supervised_phash_50pct_e1` | 0.50 | 0.3242 | 0.9843 | 0.9899 | 0.9720 | 0.9821 | 1.0000 | 0.9992 |
+| `resnet18_supervised_phash_50pct_e5` | 0.50 | 0.2517 | 0.9950 | 0.9981 | 0.9910 | 0.9966 | 1.0000 | 0.9995 |
+| `resnet18_supervised_phash_50pct_e10` | 0.50 | 0.3283 | 0.9906 | 0.9906 | 0.9966 | 0.9966 | 0.9828 | 0.9991 |
+| `resnet18_supervised_phash_50pct_e25` | 0.50 | 0.4344 | 0.9943 | 0.9906 | 0.9966 | 0.9966 | 0.9828 | 0.9991 |
 | `simclr_resnet18_phash_e25_finetune_05pct_e1` | 0.05 | 0.3389 | 0.5595 | 0.8156 | 0.2161 | 0.7413 | 0.9109 | 0.9367 |
 | `simclr_resnet18_phash_e25_finetune_10pct_e1` | 0.10 | 0.4211 | 0.9308 | 0.9534 | 0.8768 | 0.9171 | 1.0000 | 0.9711 |
 | `simclr_resnet18_phash_e25_finetune_10pct_e5` | 0.10 | 0.3493 | 0.9308 | 0.9559 | 0.8768 | 0.9351 | 0.9828 | 0.9893 |
 | `simclr_resnet18_phash_e25_finetune_10pct_e10` | 0.10 | 0.1947 | 0.9736 | 0.9666 | 0.9530 | 0.9922 | 0.9339 | 0.9975 |
 | `simclr_resnet18_phash_e25_finetune_25pct_e1` | 0.25 | 0.1542 | 0.9138 | 0.9572 | 0.8466 | 0.9395 | 0.9799 | 0.9878 |
 | `simclr_resnet18_phash_e25_finetune_50pct_e1` | 0.50 | 0.4668 | 0.9484 | 0.9597 | 0.9082 | 0.9283 | 1.0000 | 0.9893 |
+| `simclr_resnet18_phash_e25_finetune_50pct_e5` | 0.50 | 0.1449 | 0.9622 | 0.9824 | 0.9328 | 0.9933 | 0.9684 | 0.9981 |
+| `simclr_resnet18_phash_e25_finetune_50pct_e10` | 0.50 | 0.8938 | 0.9704 | 0.9924 | 0.9966 | 0.9955 | 0.9885 | 0.9991 |
+| `simclr_resnet18_phash_e25_finetune_50pct_e25` | 0.50 | 0.1301 | 0.9943 | 0.9843 | 0.9966 | 0.9966 | 0.9684 | 0.9992 |
 
 Interpretation: validation-selected thresholding materially changes the low-label comparison. It does not change AUROC, but it exposes that the default 0.5 threshold was suppressing sensitivity, especially for SSL fine-tuned models.
 
@@ -155,6 +167,35 @@ All rows use 10% labels, seed 42, the pHash near-duplicate-aware split, and ResN
 | SimCLR e25 fine-tune | 10 | 0.9736 | 0.9975 | 0.9666 | 0.9922 | 0.9339 | Strong sensitivity after tuning, but specificity tradeoff is larger. |
 
 Interpretation: longer downstream fine-tuning is mandatory before making SSL claims. SimCLR catches up substantially by 10 epochs, but the supervised ResNet-18 baseline remains stronger in this 10% seed-42 comparison.
+
+### 50% Downstream Epoch Sensitivity
+
+All rows use 50% labels, seed 42, the pHash near-duplicate-aware split, and ResNet-18. Tuned metrics use the balanced-accuracy-selected validation threshold.
+
+| Method | Epochs | Default acc | AUROC | Tuned acc | Tuned sensitivity | Tuned specificity | Interpretation |
+|---|---:|---:|---:|---:|---:|---:|---|
+| Supervised ImageNet ResNet-18 | 1 | 0.9843 | 0.9992 | 0.9899 | 0.9821 | 1.0000 | Near saturated immediately. |
+| Supervised ImageNet ResNet-18 | 5 | 0.9950 | 0.9995 | 0.9981 | 0.9966 | 1.0000 | Best 50% supervised operating point. |
+| Supervised ImageNet ResNet-18 | 10 | 0.9906 | 0.9991 | 0.9906 | 0.9966 | 0.9828 | No gain over 5 epochs. |
+| Supervised ImageNet ResNet-18 | 25 | 0.9943 | 0.9991 | 0.9906 | 0.9966 | 0.9828 | Saturated, with weaker selected specificity than e5. |
+| SimCLR e25 fine-tune | 1 | 0.9484 | 0.9893 | 0.9597 | 0.9283 | 1.0000 | Under-tuned at one epoch. |
+| SimCLR e25 fine-tune | 5 | 0.9622 | 0.9981 | 0.9824 | 0.9933 | 0.9684 | Sensitivity improves, specificity drops. |
+| SimCLR e25 fine-tune | 10 | 0.9704 | 0.9991 | 0.9924 | 0.9955 | 0.9885 | Best 50% SimCLR operating point. |
+| SimCLR e25 fine-tune | 25 | 0.9943 | 0.9992 | 0.9843 | 0.9966 | 0.9684 | Default threshold catches up, tuned specificity is weaker. |
+
+Interpretation: with 50% labels, supervised ResNet-18 is already saturated and peaks by 5 epochs. SimCLR becomes highly competitive by 10 epochs, but the 25-epoch fine-tuned model shows threshold instability: default accuracy rises while the validation-selected operating point loses specificity.
+
+## Threshold Confidence Intervals
+
+Confidence intervals are Wilson 95% intervals for the locked validation-selected threshold operating points. Full output is in `reports/threshold_confidence_intervals.csv`.
+
+| Run ID | Tuned acc (95% CI) | Tuned sensitivity (95% CI) | Tuned specificity (95% CI) |
+|---|---:|---:|---:|
+| `resnet18_supervised_phash_50pct_e5` | 0.9981 (0.9945-0.9994) | 0.9966 (0.9902-0.9989) | 1.0000 (0.9945-1.0000) |
+| `simclr_resnet18_phash_e25_finetune_50pct_e10` | 0.9924 (0.9868-0.9957) | 0.9955 (0.9885-0.9983) | 0.9885 (0.9775-0.9942) |
+| `simclr_resnet18_phash_e25_finetune_50pct_e25` | 0.9843 (0.9769-0.9893) | 0.9966 (0.9902-0.9989) | 0.9684 (0.9526-0.9790) |
+
+These intervals describe thresholded accuracy/sensitivity/specificity only. AUROC/AUPRC confidence intervals still need raw prediction export or bootstrap support.
 
 ## Repeated-Seed Summary
 

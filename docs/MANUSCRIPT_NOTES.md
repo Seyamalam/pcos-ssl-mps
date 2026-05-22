@@ -36,6 +36,10 @@ The first downstream epoch-sensitivity block changes the interpretation again. W
 
 The 10-epoch SimCLR model has high tuned sensitivity (0.9922) but lower tuned specificity (0.9339), while the 10-epoch supervised model keeps both tuned sensitivity and specificity near 0.99. This creates a clinically meaningful operating-point comparison rather than a single-score leaderboard.
 
+The 50% downstream epoch-sensitivity block adds another caution. Supervised ResNet-18 is essentially saturated by 5 epochs, reaching 0.9981 tuned accuracy with 0.9966 sensitivity and 1.0000 specificity. SimCLR e25 fine-tuning becomes competitive at 10 epochs, reaching 0.9924 tuned accuracy with 0.9955 sensitivity and 0.9885 specificity. At 25 epochs, SimCLR's default accuracy rises to 0.9943, but validation-selected tuned accuracy falls to 0.9843 because specificity drops to 0.9684. This supports a manuscript claim about operating-point reliability and threshold stability rather than simple SSL superiority.
+
+Wilson 95% confidence intervals are now available for the locked validation-selected operating points. For example, supervised ResNet-18 at 50% labels and 5 epochs has tuned accuracy 0.9981 with 95% CI 0.9945-0.9994, while SimCLR at 50% labels and 10 epochs has tuned accuracy 0.9924 with 95% CI 0.9868-0.9957. These are binomial intervals for thresholded metrics, not AUROC/AUPRC intervals; raw prediction export is still needed for bootstrap AUROC/AUPRC reporting.
+
 The cross-model robustness results are more nuanced than the clean metrics. ResNet-18 is strongest on clean accuracy but collapses under blur/downsampling. ViT-Tiny has lower clean accuracy but is far more stable under blur and downsample transformations. This may become a major manuscript finding: architecture choice changes robustness even when clean AUROC is uniformly high.
 
 The 25-epoch SimCLR 50% fine-tuned model improved Gaussian-noise accuracy compared with supervised ResNet-18 on the same pHash test split (0.8785 versus 0.7728), but it remained brittle to blur and downsampling (0.5639 and 0.5670 accuracy). This suggests the robustness claim should be transformation-specific rather than framed as SSL being broadly robust.
@@ -51,9 +55,10 @@ The pHash audit found 38 cross-label near-duplicate groups. These must be inspec
 1. Dataset audit table: counts, duplicates, near-duplicates, split sizes.
 2. Baseline comparison: ResNet, EfficientNet, ConvNeXt, ViT across exact and pHash splits.
 3. Label-efficiency table: supervised vs SimCLR at 5%, 10%, 25%, 50%, 100%.
-4. Downstream epoch-sensitivity table: supervised vs SimCLR at 10% labels across 1, 5, and 10 epochs.
+4. Downstream epoch-sensitivity table: supervised vs SimCLR at 10% and 50% labels across 1, 5, 10, and 25 epochs where available.
 5. Robustness table: clean, crop, contrast, blur, downsample, noise.
-6. Calibration table: AUROC, AUPRC, ECE, Brier score if added.
+6. Threshold-selected operating-point table with Wilson confidence intervals.
+7. Calibration table: AUROC, AUPRC, ECE, Brier score if added.
 
 ## Planned Figures
 

@@ -261,6 +261,21 @@ Label budgets:
 
 Interpretation: the one-epoch label-efficiency table was not enough to judge downstream behavior. SimCLR improves substantially with longer fine-tuning, but supervised ImageNet-pretrained ResNet-18 is currently the strongest 10% label model after 10 epochs.
 
+50% downstream epoch sensitivity:
+
+| Method | Epochs | Default acc | AUROC | Tuned acc | Tuned sensitivity | Tuned specificity | Current read |
+|---|---:|---:|---:|---:|---:|---:|---|
+| Supervised ResNet-18 | 1 | 0.9843 | 0.9992 | 0.9899 | 0.9821 | 1.0000 | Near saturated immediately. |
+| Supervised ResNet-18 | 5 | 0.9950 | 0.9995 | 0.9981 | 0.9966 | 1.0000 | Best 50% operating point so far. |
+| Supervised ResNet-18 | 10 | 0.9906 | 0.9991 | 0.9906 | 0.9966 | 0.9828 | No gain over 5 epochs. |
+| Supervised ResNet-18 | 25 | 0.9943 | 0.9991 | 0.9906 | 0.9966 | 0.9828 | Default accuracy high, tuned operating point weaker than e5. |
+| SimCLR e25 fine-tune | 1 | 0.9484 | 0.9893 | 0.9597 | 0.9283 | 1.0000 | Under-tuned at one epoch. |
+| SimCLR e25 fine-tune | 5 | 0.9622 | 0.9981 | 0.9824 | 0.9933 | 0.9684 | Strong sensitivity gain with specificity cost. |
+| SimCLR e25 fine-tune | 10 | 0.9704 | 0.9991 | 0.9924 | 0.9955 | 0.9885 | Best 50% SimCLR operating point so far. |
+| SimCLR e25 fine-tune | 25 | 0.9943 | 0.9992 | 0.9843 | 0.9966 | 0.9684 | Default threshold catches up, but tuned specificity drops. |
+
+Confidence intervals for the validation-selected operating points are now in `reports/threshold_confidence_intervals.csv`. They use Wilson 95% intervals for accuracy, sensitivity, and specificity at the locked validation-selected threshold.
+
 Fine-tuning modes:
 
 - Linear probe: freeze encoder, train classifier head.
@@ -273,6 +288,8 @@ Status:
 - [ ] Run linear-probe experiments.
 - [ ] Run partial fine-tuning experiments.
 - [x] Run first full fine-tuning experiments.
+- [x] Run 10% and 50% downstream epoch-sensitivity experiments.
+- [x] Add Wilson confidence intervals for threshold-selected operating points.
 
 ### Phase 5: Robustness and Artifact Tests
 
@@ -509,6 +526,14 @@ Thresholds are selected on the validation split only, then locked before test ev
 | SimCLR e25 fine-tune | 25% | 0.9138 | 0.9572 | 0.8466 | 0.9395 | 0.9799 | 0.9878 |
 | SimCLR e25 fine-tune | 50% | 0.9484 | 0.9597 | 0.9082 | 0.9283 | 1.0000 | 0.9893 |
 
+Wilson 95% confidence intervals for tuned accuracy, sensitivity, and specificity are tracked in `reports/threshold_confidence_intervals.csv`. Current key 50% label operating points:
+
+| Experiment | Epochs | Tuned acc (95% CI) | Tuned sensitivity (95% CI) | Tuned specificity (95% CI) |
+|---|---:|---:|---:|---:|
+| ResNet-18 supervised | 5 | 0.9981 (0.9945-0.9994) | 0.9966 (0.9902-0.9989) | 1.0000 (0.9945-1.0000) |
+| SimCLR e25 fine-tune | 10 | 0.9924 (0.9868-0.9957) | 0.9955 (0.9885-0.9983) | 0.9885 (0.9775-0.9942) |
+| SimCLR e25 fine-tune | 25 | 0.9843 (0.9769-0.9893) | 0.9966 (0.9902-0.9989) | 0.9684 (0.9526-0.9790) |
+
 ### Repeated-Seed Snapshot
 
 Seeds: 42, 7, and 123. All runs use one downstream epoch on the pHash near-duplicate-aware split.
@@ -578,7 +603,9 @@ Every experiment should record:
 10. [x] Fine-tune SSL encoder under 5%, 10%, 25%, and 50% labels.
 11. [ ] Add 100% SSL fine-tuning comparison.
 12. [x] Compare against supervised baselines.
-13. [ ] Add robustness severity sweeps and XAI analysis.
+13. [x] Add confidence intervals for validation-selected operating points.
+14. [ ] Add raw prediction export for bootstrap AUROC/AUPRC confidence intervals.
+15. [ ] Add robustness severity sweeps and XAI analysis.
 
 ## Current Decision Log
 

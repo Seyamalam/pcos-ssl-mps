@@ -13,13 +13,14 @@ Working queue for the PCOS SSL manuscript experiments.
 2. Extend downstream fine-tuning beyond one epoch.
    - Start with ResNet-18 supervised and SimCLR e25 fine-tune at 10% and 50%.
    - Compared 1, 5, and 10 downstream epochs at 10% labels for supervised ResNet-18 and SimCLR e25.
-   - Next compare 1, 5, 10, and 25 downstream epochs at 50% labels.
+   - Compared 1, 5, 10, and 25 downstream epochs at 50% labels for supervised ResNet-18 and SimCLR e25.
    - Watch calibration, not just accuracy/AUROC.
 
 3. Extend validation-selected threshold analysis.
    - Current SSL fine-tuned models often have perfect specificity but weak sensitivity at the default 0.5 threshold.
    - Validation-selected thresholds have been added for balanced accuracy, Youden index, F1, and sensitivity-constrained settings.
-   - Next: add confidence intervals for tuned operating points and decide which objective belongs in the main manuscript table.
+   - Wilson confidence intervals have been added for balanced-accuracy-selected tuned accuracy, sensitivity, and specificity.
+   - Next: persist raw test predictions so AUROC/AUPRC bootstrap confidence intervals can be reported too.
 
 4. Add more SSL methods.
    - BYOL as the next non-contrastive method.
@@ -40,11 +41,11 @@ Working queue for the PCOS SSL manuscript experiments.
 
 The first pass does not yet show SSL superiority. Supervised ImageNet-pretrained ResNet-18 remains very strong under the pHash near-duplicate-aware split, even at low label fractions. The useful manuscript angle is more subtle: strict leakage control, label-efficiency behavior, calibration failure modes, transformation-specific robustness, and explanation stability.
 
-The 10% downstream epoch-sensitivity block shows SimCLR improves strongly with longer fine-tuning, but supervised ResNet-18 is currently best at 10 epochs. This makes the next scientific move a 50% epoch-sensitivity run plus confidence intervals, not another one-epoch model leaderboard.
+The 10% downstream epoch-sensitivity block shows SimCLR improves strongly with longer fine-tuning, but supervised ResNet-18 is currently best at 10 epochs. The 50% block shows supervised ResNet-18 saturates by 5 epochs, while SimCLR becomes competitive by 10 epochs but has less stable threshold-selected specificity at 25 epochs. The next scientific move is prediction export plus bootstrap AUROC/AUPRC confidence intervals, followed by robustness severity sweeps.
 
 ## Blockers To Resolve
 
 - Inspect the 38 cross-label pHash near-duplicate groups.
-- Add confidence intervals for validation-selected threshold evaluation.
+- Add raw prediction export for bootstrap AUROC/AUPRC confidence intervals.
 - Add multi-seed experiment runner to avoid manual command loops.
 - Decide whether to include random image split only as a leakage demonstration.
