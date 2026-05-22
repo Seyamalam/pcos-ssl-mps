@@ -9,9 +9,15 @@ from rich.console import Console
 
 
 RUN_PATTERN = re.compile(
-    r"^(?P<family>resnet18_supervised_phash|simclr_resnet18_phash_e25_finetune)_"
+    r"^(?P<family>resnet18_supervised_phash|simclr_resnet18_phash_e25_finetune|byol_resnet18_phash_e25_finetune)_"
     r"(?P<label>\d+pct)(?:_seed(?P<seed>\d+))?_e(?P<epochs>\d+)$"
 )
+
+METHODS = {
+    "resnet18_supervised_phash": "supervised_resnet18",
+    "simclr_resnet18_phash_e25_finetune": "simclr_e25_finetune",
+    "byol_resnet18_phash_e25_finetune": "byol_e25_finetune",
+}
 
 
 def parse_args() -> argparse.Namespace:
@@ -33,7 +39,7 @@ def add_run_metadata(frame: pd.DataFrame) -> pd.DataFrame:
         label = match.group("label")
         if label not in {"10pct", "25pct", "50pct"}:
             continue
-        method = "supervised_resnet18" if match.group("family") == "resnet18_supervised_phash" else "simclr_e25_finetune"
+        method = METHODS[match.group("family")]
         seed = int(match.group("seed") or 42)
         enriched = row.to_dict()
         enriched.update(

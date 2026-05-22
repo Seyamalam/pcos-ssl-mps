@@ -32,6 +32,7 @@ def plot_seed_summary(seed_summary: pd.DataFrame, output_dir: Path) -> Path:
         {
             "supervised_resnet18": "Supervised ResNet-18",
             "simclr_e25_finetune": "SimCLR e25 fine-tune",
+            "byol_e25_finetune": "BYOL e25 fine-tune",
         }
     )
     path = output_dir / "seed_summary_accuracy.png"
@@ -61,8 +62,10 @@ def plot_threshold_ci(threshold_ci: pd.DataFrame, output_dir: Path) -> Path:
     wanted = [
         "resnet18_supervised_phash_10pct_e10",
         "simclr_resnet18_phash_e25_finetune_10pct_e10",
+        "byol_resnet18_phash_e25_finetune_10pct_e10",
         "resnet18_supervised_phash_50pct_e10",
         "simclr_resnet18_phash_e25_finetune_50pct_e10",
+        "byol_resnet18_phash_e25_finetune_50pct_e10",
         "simclr_resnet18_phash_e25_finetune_50pct_e25",
     ]
     frame = threshold_ci[threshold_ci["run_id"].isin(wanted)].copy()
@@ -87,6 +90,7 @@ def plot_threshold_ci(threshold_ci: pd.DataFrame, output_dir: Path) -> Path:
 def plot_calibration_improvement(calibration: pd.DataFrame, output_dir: Path) -> Path:
     frame = calibration.copy()
     frame["short_run"] = frame["run_id"].str.replace("simclr_resnet18_phash_e25_finetune", "simclr")
+    frame["short_run"] = frame["short_run"].str.replace("byol_resnet18_phash_e25_finetune", "byol")
     frame["short_run"] = frame["short_run"].str.replace("resnet18_supervised_phash", "resnet")
     path = output_dir / "calibration_brier_improvement.png"
     plt.figure(figsize=(9, 4.8))

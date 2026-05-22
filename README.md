@@ -122,7 +122,7 @@ flowchart TD
 
     E --> G["Supervised baselines<br/>ResNet, EfficientNet, ConvNeXt, ViT"]
     F --> G
-    F --> H["Self-supervised pretraining<br/>SimCLR on unlabeled train images"]
+    F --> H["Self-supervised pretraining<br/>SimCLR and BYOL on unlabeled train images"]
 
     G --> I["Clean test evaluation<br/>Accuracy, AUROC, AUPRC, F1, ECE"]
     H --> J["Downstream evaluation<br/>linear probe and fine-tuning"]
@@ -232,7 +232,7 @@ Status:
 - [x] Run small MPS smoke test.
 - [x] Run full SimCLR pretraining.
 - [x] Save encoder checkpoint.
-- [ ] Try BYOL.
+- [x] Try BYOL.
 - [ ] Try DINO/ViT if feasible.
 
 ### Phase 4: Label-Efficiency Fine-Tuning
@@ -259,6 +259,7 @@ Label budgets:
 | SimCLR e25 fine-tune | 1 | 0.9308 | 0.9711 | 0.9534 | 0.9171 | 1.0000 | Competitive but under-tuned. |
 | SimCLR e25 fine-tune | 5 | 0.9308 | 0.9893 | 0.9559 | 0.9351 | 0.9828 | AUROC improves with more epochs. |
 | SimCLR e25 fine-tune | 10 | 0.9736 | 0.9975 | 0.9666 | 0.9922 | 0.9339 | Sensitivity becomes strong, but specificity tradeoff appears. |
+| BYOL e25 fine-tune | 10 | 0.9836 | 0.9972 | 0.9818 | 0.9765 | 0.9885 | Strong seed-42 result; multi-seed variance is higher than SimCLR. |
 
 Interpretation: the one-epoch label-efficiency table was not enough to judge downstream behavior. SimCLR improves substantially with longer fine-tuning, but supervised ImageNet-pretrained ResNet-18 is currently the strongest 10% label model after 10 epochs.
 
@@ -274,6 +275,7 @@ Interpretation: the one-epoch label-efficiency table was not enough to judge dow
 | SimCLR e25 fine-tune | 5 | 0.9622 | 0.9981 | 0.9824 | 0.9933 | 0.9684 | Strong sensitivity gain with specificity cost. |
 | SimCLR e25 fine-tune | 10 | 0.9704 | 0.9991 | 0.9924 | 0.9955 | 0.9885 | Best 50% SimCLR operating point so far. |
 | SimCLR e25 fine-tune | 25 | 0.9943 | 0.9992 | 0.9843 | 0.9966 | 0.9684 | Default threshold catches up, but tuned specificity drops. |
+| BYOL e25 fine-tune | 10 | 0.9818 | 0.9985 | 0.9937 | 0.9955 | 0.9914 | Strong second SSL family; close to SimCLR at the tuned operating point. |
 
 Confidence intervals for the validation-selected operating points are now in `reports/threshold_confidence_intervals.csv`. They use Wilson 95% intervals for accuracy, sensitivity, and specificity at the locked validation-selected threshold.
 
@@ -292,6 +294,7 @@ Status:
 - [x] Run 10% and 50% downstream epoch-sensitivity experiments.
 - [x] Add Wilson confidence intervals for threshold-selected operating points.
 - [x] Run 10% and 50% multi-seed 10-epoch supervised vs SimCLR fine-tuning sweep.
+- [x] Run BYOL as a second SSL family under the same 10%/50% three-seed 10-epoch protocol.
 
 Multi-seed 10-epoch summary:
 
@@ -299,8 +302,10 @@ Multi-seed 10-epoch summary:
 |---|---:|---:|---:|---:|---:|---:|---:|
 | Supervised ResNet-18 | 10% | 3 | 0.9794 +/- 0.0075 | 0.9984 +/- 0.0009 | 0.9832 +/- 0.0149 | 0.9828 | 0.9837 |
 | SimCLR e25 fine-tune | 10% | 3 | 0.9755 +/- 0.0019 | 0.9963 +/- 0.0011 | 0.9759 +/- 0.0080 | 0.9854 | 0.9636 |
+| BYOL e25 fine-tune | 10% | 3 | 0.9507 +/- 0.0286 | 0.9942 +/- 0.0028 | 0.9675 +/- 0.0172 | 0.9690 | 0.9655 |
 | Supervised ResNet-18 | 50% | 3 | 0.9931 +/- 0.0044 | 0.9991 +/- 0.0000 | 0.9931 +/- 0.0044 | 0.9966 | 0.9885 |
 | SimCLR e25 fine-tune | 50% | 3 | 0.9673 +/- 0.0029 | 0.9986 +/- 0.0004 | 0.9939 +/- 0.0025 | 0.9951 | 0.9923 |
+| BYOL e25 fine-tune | 50% | 3 | 0.9734 +/- 0.0173 | 0.9981 +/- 0.0004 | 0.9899 +/- 0.0045 | 0.9948 | 0.9837 |
 
 ### Phase 5: Robustness and Artifact Tests
 
@@ -558,6 +563,7 @@ Wilson 95% confidence intervals for tuned accuracy, sensitivity, and specificity
 |---|---:|---:|---:|---:|
 | ResNet-18 supervised | 5 | 0.9981 (0.9945-0.9994) | 0.9966 (0.9902-0.9989) | 1.0000 (0.9945-1.0000) |
 | SimCLR e25 fine-tune | 10 | 0.9924 (0.9868-0.9957) | 0.9955 (0.9885-0.9983) | 0.9885 (0.9775-0.9942) |
+| BYOL e25 fine-tune | 10 | 0.9937 (0.9885-0.9966) | 0.9955 (0.9885-0.9983) | 0.9914 (0.9813-0.9960) |
 | SimCLR e25 fine-tune | 25 | 0.9843 (0.9769-0.9893) | 0.9966 (0.9902-0.9989) | 0.9684 (0.9526-0.9790) |
 
 Raw prediction CSVs are now exported for the main manuscript operating points in `reports/predictions/`. Bootstrap AUROC/AUPRC intervals are tracked in `reports/bootstrap_auc_ci.csv`.
@@ -566,8 +572,10 @@ Raw prediction CSVs are now exported for the main manuscript operating points in
 |---|---:|---:|
 | ResNet-18 supervised, 10% labels, 10 epochs | 0.9989 (0.9967-1.0000) | 0.9994 (0.9984-1.0000) |
 | SimCLR e25 fine-tune, 10% labels, 10 epochs | 0.9975 (0.9947-0.9994) | 0.9985 (0.9971-0.9996) |
+| BYOL e25 fine-tune, 10% labels, 10 epochs | 0.9972 (0.9949-0.9990) | 0.9983 (0.9969-0.9994) |
 | ResNet-18 supervised, 50% labels, 5 epochs | 0.9995 (0.9987-1.0000) | 0.9996 (0.9992-1.0000) |
 | SimCLR e25 fine-tune, 50% labels, 10 epochs | 0.9991 (0.9980-0.9999) | 0.9994 (0.9987-0.9999) |
+| BYOL e25 fine-tune, 50% labels, 10 epochs | 0.9985 (0.9966-1.0000) | 0.9991 (0.9980-1.0000) |
 | SimCLR e25 fine-tune, 50% labels, 25 epochs | 0.9992 (0.9981-1.0000) | 0.9995 (0.9988-1.0000) |
 
 Calibration artifacts:
@@ -575,7 +583,7 @@ Calibration artifacts:
 - `reports/calibration_summary.csv`
 - `reports/figures/calibration_curves.png`
 
-Current calibration read: supervised ResNet-18 at 50% labels and 5 epochs has the best Brier score among the main operating points (`0.0043`). SimCLR at 50% labels and 25 epochs is close (`0.0049`) and has the lowest ECE (`0.0049`), but its validation-selected operating point had weaker specificity than the 10-epoch SimCLR checkpoint.
+Current calibration read: supervised ResNet-18 at 50% labels and 5 epochs has the best Brier score among the main operating points (`0.0043`). BYOL at 50% labels and 10 epochs is also strong (`0.0120` uncalibrated Brier, `0.0043` after Platt scaling). SimCLR at 50% labels and 25 epochs is close (`0.0049`) and has low ECE, but its validation-selected operating point had weaker specificity than the 10-epoch SimCLR checkpoint.
 
 ### Repeated-Seed Snapshot
 
@@ -674,12 +682,13 @@ Every experiment should record:
 8. [x] Run SimCLR smoke test on a small subset.
 9. [x] Run full SimCLR pretraining.
 10. [x] Fine-tune SSL encoder under 5%, 10%, 25%, and 50% labels.
-11. [ ] Add 100% SSL fine-tuning comparison.
-12. [x] Compare against supervised baselines.
-13. [x] Add confidence intervals for validation-selected operating points.
-14. [x] Add raw prediction export for bootstrap AUROC/AUPRC confidence intervals.
-15. [x] Add robustness severity sweeps.
-16. [ ] Add XAI analysis.
+11. [x] Add BYOL SSL comparison at 10% and 50% labels.
+12. [ ] Add 100% SSL fine-tuning comparison.
+13. [x] Compare against supervised baselines.
+14. [x] Add confidence intervals for validation-selected operating points.
+15. [x] Add raw prediction export for bootstrap AUROC/AUPRC confidence intervals.
+16. [x] Add robustness severity sweeps.
+17. [x] Add XAI analysis.
 
 ## Current Decision Log
 
@@ -691,6 +700,7 @@ Every experiment should record:
 | 2026-05-21 | Use duplicate-aware split as main benchmark | Prevents inflated test performance |
 | 2026-05-21 | Keep raw dataset and Grad-CAM image derivatives out of GitHub | Avoid publishing Kaggle image files or visual derivatives |
 | 2026-05-21 | Add pHash near-duplicate split as stricter benchmark | pHash threshold 4 found 38 cross-label near-duplicate groups |
+| 2026-05-22 | Add BYOL as second SSL family | Non-contrastive SSL gives a fair comparison against SimCLR under the same ResNet-18, pHash split, and 10%/50% multi-seed protocol |
 
 ## Notes to Update Later
 

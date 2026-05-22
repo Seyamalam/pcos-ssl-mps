@@ -308,3 +308,34 @@ Move from promising experiments toward manuscript-grade evidence: sanity-check e
 **Interpretation**
 
 The strongest paper angle is not "SSL beats supervised." The stronger contribution is a reliability-centered protocol for low-cleanliness PCOS ultrasound classification: leakage-aware splits, low-label multi-seed comparison, threshold-selected clinical operating points, calibration, robustness severity, and XAI sanity checks.
+
+## 2026-05-22: BYOL Second SSL Family
+
+Goal: add a non-contrastive SSL family and compare it fairly against SimCLR under the same pHash split, ResNet-18 encoder, 10%/50% label fractions, three seeds, and 10 downstream epochs.
+
+BYOL pretraining:
+
+| Run | Method | Backbone | Split | Epochs | Final train loss | Notes |
+|---|---|---|---|---:|---:|---|
+| `byol_smoke` | BYOL | ResNet-18 | pHash train split | 1 batch | 2.0523 | MPS smoke test. |
+| `byol_resnet18_phash_e25` | BYOL | ResNet-18 | pHash train split | 25 | 0.0606 | Stable loss, no collapse observed. |
+
+Matched 10-epoch multi-seed downstream comparison:
+
+| Method | Label budget | Seeds | Default acc mean +/- std | AUROC mean +/- std | Tuned acc mean +/- std | Tuned sensitivity mean | Tuned specificity mean |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| Supervised ResNet-18 | 10% | 3 | 0.9794 +/- 0.0075 | 0.9984 +/- 0.0009 | 0.9832 +/- 0.0149 | 0.9828 | 0.9837 |
+| SimCLR e25 fine-tune | 10% | 3 | 0.9755 +/- 0.0019 | 0.9963 +/- 0.0011 | 0.9759 +/- 0.0080 | 0.9854 | 0.9636 |
+| BYOL e25 fine-tune | 10% | 3 | 0.9507 +/- 0.0286 | 0.9942 +/- 0.0028 | 0.9675 +/- 0.0172 | 0.9690 | 0.9655 |
+| Supervised ResNet-18 | 50% | 3 | 0.9931 +/- 0.0044 | 0.9991 +/- 0.0000 | 0.9931 +/- 0.0044 | 0.9966 | 0.9885 |
+| SimCLR e25 fine-tune | 50% | 3 | 0.9673 +/- 0.0029 | 0.9986 +/- 0.0004 | 0.9939 +/- 0.0025 | 0.9951 | 0.9923 |
+| BYOL e25 fine-tune | 50% | 3 | 0.9734 +/- 0.0173 | 0.9981 +/- 0.0004 | 0.9899 +/- 0.0045 | 0.9948 | 0.9837 |
+
+Main seed-42 BYOL operating points:
+
+| Run | Default acc | AUROC | Tuned acc | Tuned sensitivity | Tuned specificity | Brier score |
+|---|---:|---:|---:|---:|---:|---:|
+| `byol_resnet18_phash_e25_finetune_10pct_e10` | 0.9836 | 0.9972 | 0.9818 | 0.9765 | 0.9885 | 0.0258 |
+| `byol_resnet18_phash_e25_finetune_50pct_e10` | 0.9818 | 0.9985 | 0.9937 | 0.9955 | 0.9914 | 0.0120 |
+
+Interpretation: BYOL gives a real second SSL family but does not reverse the main conclusion. Supervised ResNet-18 remains the strongest and most stable default baseline. SimCLR is more stable than BYOL at 10% labels in this three-seed block, while BYOL is competitive at 50% labels and has a strong calibrated operating point after Platt scaling. The manuscript should present SSL as useful but reliability-sensitive, not as a universal replacement for supervised transfer.

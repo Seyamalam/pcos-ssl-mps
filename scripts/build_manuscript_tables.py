@@ -105,6 +105,7 @@ def main() -> None:
     main_threshold_ids = [
         "resnet18_supervised_phash_50pct_e5",
         "simclr_resnet18_phash_e25_finetune_50pct_e10",
+        "byol_resnet18_phash_e25_finetune_50pct_e10",
         "simclr_resnet18_phash_e25_finetune_50pct_e25",
     ]
     threshold_table = threshold_ci[threshold_ci["run_id"].isin(main_threshold_ids)][

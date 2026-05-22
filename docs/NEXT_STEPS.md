@@ -26,7 +26,7 @@ Working queue for the PCOS SSL manuscript experiments.
    - Next: decide whether calibrated probabilities belong in the main paper or supplementary material.
 
 4. Add more SSL methods.
-   - BYOL as the next non-contrastive method.
+   - BYOL is complete as the next non-contrastive method under the same 10%/50% three-seed, 10-downstream-epoch protocol used for SimCLR.
    - DINO or MAE for ViT-style SSL if runtime permits.
    - Keep SimCLR as the reproducible baseline.
 
@@ -46,10 +46,11 @@ Working queue for the PCOS SSL manuscript experiments.
 
 The first pass does not yet show SSL superiority. Supervised ImageNet-pretrained ResNet-18 remains very strong under the pHash near-duplicate-aware split, even at low label fractions. The useful manuscript angle is more subtle: strict leakage control, label-efficiency behavior, calibration failure modes, transformation-specific robustness, and explanation stability.
 
-The 10% downstream epoch-sensitivity block shows SimCLR improves strongly with longer fine-tuning, but supervised ResNet-18 is currently best at 10 epochs. The 50% block shows supervised ResNet-18 saturates by 5 epochs, while SimCLR becomes competitive by 10 epochs but has less stable threshold-selected specificity at 25 epochs. Bootstrap AUROC/AUPRC intervals show ranking performance is nearly saturated for both strong supervised and SSL checkpoints. The robustness severity sweep shows ViT-Tiny is the strongest robustness model despite lower clean accuracy, while the SimCLR 50% e10 checkpoint is clean-competitive but not corruption-robust.
+The 10% downstream epoch-sensitivity block shows SimCLR improves strongly with longer fine-tuning, but supervised ResNet-18 is currently best at 10 epochs. BYOL adds a useful second SSL result: at 10% labels it is strong for seed 42 but more variable across seeds than SimCLR; at 50% labels it is close to SimCLR at the validation-selected operating point. The 50% block shows supervised ResNet-18 saturates by 5 epochs, while SimCLR and BYOL become competitive by 10 epochs. Bootstrap AUROC/AUPRC intervals show ranking performance is nearly saturated for strong supervised and SSL checkpoints. The robustness severity sweep shows ViT-Tiny is the strongest robustness model despite lower clean accuracy, while the SimCLR 50% e10 checkpoint is clean-competitive but not corruption-robust.
 
 ## Blockers To Resolve
 
+- Decide whether to run DINO/MAE now or stop model experiments and pivot fully to data collection/manuscript writing.
 - Decide whether to extend the multi-seed runner to 5%/25% longer downstream runs.
 - Decide whether to include random image split only as a leakage demonstration.
 - Decide which final figure set goes into main manuscript vs supplement.

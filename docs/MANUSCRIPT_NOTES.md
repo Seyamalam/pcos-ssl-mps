@@ -60,6 +60,10 @@ Calibration improvement experiments show that Platt scaling often improves under
 
 Grad-CAM sanity checks are now complete for supervised ResNet-18 50% e5 and SimCLR 50% e10. Trained-vs-random Grad-CAM similarity is low, supporting non-random attribution structure. However, border-mask perturbation can increase PCOS probability for some cases, which is a cautionary artifact-sensitivity finding. This should be discussed as evidence that XAI panels need sanity checks and perturbation tests before clinical interpretation.
 
+BYOL is complete as the second SSL family. It was pretrained for 25 epochs on the pHash-aware unlabeled train split and fine-tuned under the same 10%/50% three-seed, 10-epoch protocol used for SimCLR. At 10% labels, BYOL has higher variance than SimCLR: default accuracy `0.9507 +/- 0.0286`, AUROC `0.9942 +/- 0.0028`, and validation-selected accuracy `0.9675 +/- 0.0172`. At 50% labels, BYOL is stronger and close to SimCLR at the operating point: default accuracy `0.9734 +/- 0.0173`, AUROC `0.9981 +/- 0.0004`, and validation-selected accuracy `0.9899 +/- 0.0045`. This supports a nuanced conclusion: adding a non-contrastive SSL family does not overturn supervised ResNet-18, but it confirms that SSL can produce clinically usable operating points under strict duplicate control.
+
+For the main 50% seed-42 operating point, BYOL e25 fine-tune reaches tuned accuracy `0.9937` with 95% Wilson CI `0.9885-0.9966`, sensitivity `0.9955`, specificity `0.9914`, AUROC `0.9985`, and AUPRC `0.9991`. Its uncalibrated Brier score is `0.0120`, improving to `0.0043` with Platt scaling. This gives the manuscript a second SSL family for calibration and threshold-selection discussion, not just a second row in a leaderboard.
+
 The first one-epoch label-efficiency pass suggests supervised ImageNet-pretrained ResNet-18 is already strong with small label fractions, but low-label runs can be poorly calibrated. Repeated seeds and longer fine-tuning are needed before making final low-label claims.
 
 ## Important Caution
@@ -70,8 +74,8 @@ The pHash audit found 38 cross-label near-duplicate groups. These must be inspec
 
 1. Dataset audit table: counts, duplicates, near-duplicates, split sizes.
 2. Baseline comparison: ResNet, EfficientNet, ConvNeXt, ViT across exact and pHash splits.
-3. Label-efficiency table: supervised vs SimCLR at 5%, 10%, 25%, 50%, 100%.
-4. Downstream epoch-sensitivity table: supervised vs SimCLR at 10% and 50% labels across 1, 5, 10, and 25 epochs where available.
+3. Label-efficiency table: supervised vs SimCLR/BYOL at 5%, 10%, 25%, 50%, 100% where available.
+4. Downstream epoch-sensitivity table: supervised vs SimCLR at 10% and 50% labels across 1, 5, 10, and 25 epochs where available, plus BYOL at the matched 10-epoch multi-seed setting.
 5. Robustness table: clean, crop, contrast, blur, downsample, noise.
 6. Threshold-selected operating-point table with Wilson confidence intervals.
 7. Calibration table: AUROC, AUPRC, ECE, Brier score if added.

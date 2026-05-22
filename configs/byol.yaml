@@ -1,0 +1,21 @@
+seed: 42
+runtime:
+  device: mps
+  cpu_threads: 18
+data:
+  split_csv: metadata/splits_near_duplicate_aware_phash.csv
+  image_size: 224
+training:
+  batch_size: 64
+  num_workers: 0
+  epochs: 25
+  optimizer: adamw
+  learning_rate: 0.0003
+  weight_decay: 0.000001
+  momentum: 0.996
+model:
+  backbone: resnet18
+  projection_dim: 256
+  hidden_dim: 1024
+  predictor_hidden_dim: 512
+  pretrained: false
