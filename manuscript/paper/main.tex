@@ -35,10 +35,12 @@
 
 \title[Duplicate-aware SSL for PCOS ultrasound]{Reliability-Centered Self-Supervised Learning for PCOS Ultrasound Classification Under Duplicate-Aware Evaluation}
 
-\author*[1]{\fnm{Seyam} \sur{Alam}}\email{REPLACE-WITH-EMAIL}
-\author[1]{\fnm{REPLACE} \sur{Coauthor}}\email{REPLACE-WITH-EMAIL}
+\author*[1]{\fnm{Touhidul Alam} \sur{Seyam}}\email{touhidulalam@bgctub.ac.bd}
+\author[1]{\fnm{Afrin Sultana} \sur{Niharika}}\email{afrin.niharika@bgctub.ac.bd}
+\author[1]{\fnm{Shafiul Azam} \sur{Mahin}}\email{shafiul.mahin@bgctub.ac.bd}
+\author[1]{\fnm{Chandnin Baria} \sur{Jowthi}}\email{chandnin.jowthi@bgctub.ac.bd}
 
-\affil*[1]{\orgdiv{REPLACE Department or Laboratory}, \orgname{REPLACE Institution}, \orgaddress{\city{REPLACE City}, \country{REPLACE Country}}}
+\affil*[1]{\orgdiv{Department of Computer Science \& Engineering}, \orgname{BGC Trust University Bangladesh}, \orgaddress{\city{Chattogram}, \country{Bangladesh}}}
 
 \abstract{Public ultrasound datasets for polycystic ovary syndrome (PCOS) can support rapid artificial-intelligence research, but duplicated images, perceptual near-duplicates, label conflicts, and preprocessing artifacts can inflate apparent performance and obscure clinically relevant failure modes. We present a reliability-centered evaluation protocol for PCOS ultrasound classification using the PCOS-XAI Ultrasound dataset. The protocol audits image readability, exact duplicates, perceptual hashes, cross-label near-duplicate groups, and leakage-aware train/validation/test splits before model fitting. We compare ImageNet-supervised convolutional and transformer baselines with self-supervised SimCLR and BYOL ResNet-18 encoders under low-label downstream fine-tuning. We further evaluate validation-selected operating points, Wilson confidence intervals, bootstrap AUROC/AUPRC intervals, calibration, corruption-severity robustness, and Grad-CAM sanity checks. The local audit found 11,784 readable images, 1,956 exact duplicate groups, 1,788 pHash near-duplicate groups, and 38 cross-label pHash groups that were excluded from strict splits. Under three-seed 10-epoch fine-tuning, supervised ResNet-18 remained strongest at 10\% labels (accuracy 0.9794 +/- 0.0075, AUROC 0.9984 +/- 0.0009), while SimCLR and BYOL became competitive in validation-selected operating points at 50\% labels. SimCLR reached tuned accuracy 0.9939 +/- 0.0025 and BYOL reached 0.9899 +/- 0.0045 at 50\% labels, compared with 0.9931 +/- 0.0044 for supervised ResNet-18. Robustness and XAI analyses revealed that high clean accuracy did not guarantee stability under blur, downsampling, border perturbation, or calibration shifts. These findings support a publishable reliability claim: in low-cleanliness PCOS ultrasound classification, duplicate-aware evaluation, threshold selection, calibration, robustness, and explanation sanity checks are as important as the choice between supervised transfer and self-supervised learning.}
 
@@ -346,7 +348,7 @@ The source dataset is available from Kaggle as the PCOS-XAI Ultrasound Dataset \
 The analysis code, experiment scripts, report tables, and manuscript source are available at \url{https://github.com/Seyamalam/pcos-ssl-mps}. Raw dataset folders, model checkpoints, run artifacts, and image derivatives are excluded from version control.
 
 \bmhead{Author contribution}
-S.A. designed the study, implemented the pipeline, ran experiments, analyzed results, and drafted the manuscript. Additional author contributions should be added before submission.
+T.A.S. designed the study, implemented the pipeline, ran experiments, analyzed results, and drafted the manuscript. A.S.N., S.A.M., and C.B.J. contributed to literature review, manuscript preparation, and result interpretation. All authors reviewed and approved the final manuscript.
 
 \begin{appendices}
 
