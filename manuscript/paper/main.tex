@@ -65,6 +65,16 @@ Our contributions are:
     \item A reproducible Apple Silicon PyTorch/MPS workflow suitable for local medical-imaging experimentation.
 \end{enumerate}
 
+\section{Related work}\label{sec:related_work}
+
+Recent PCOS ultrasound AI work has accelerated quickly, with many 2024--2026 studies proposing stronger classifiers, attention mechanisms, hybrid feature fusion, or multimodal designs. PCOS-specific ultrasound classifiers include CystNet, which combines thresholding, autoencoding, transfer learning, and classical machine-learning stages \cite{moral2024cystnet}; lightweight and class-imbalance-aware CNN pipelines using SMOTE \cite{ahmad2024smote}; self-defined CNN feature extractors followed by conventional classifiers \cite{paramasivam2024self_defined_cnn}; pelvic-ultrasound machine-learning classification \cite{kermanshahchi2024pelvic_ultrasound}; and deep-learning PCOS ultrasound classifiers reported in recent IEEE proceedings \cite{jency2024pcos_ultrasound}. Newer work has moved toward larger datasets, hybrid architectures, and interpretability: Zhao et al. reported a prospective automatic recognition model for polycystic ovary ultrasound images \cite{zhao2025automatic_recognition}; Sundari et al. integrated ultrasound images with biomarker features for PCOD diagnosis \cite{sundari2025integrative_pcod}; Saha et al. proposed PCOSFusionNet with handcrafted and VGG19-derived features \cite{saha2026pcosfusionnet}; Tiwari et al. introduced attention-guided lightweight PCOS ultrasound classification \cite{tiwari2026attention}; Maisarah et al. combined VGG16 and AlexNet for PCOS ultrasound classification \cite{maisarah2026hybrid}; and Patil and Chaudhari proposed an attention residual ensemble with Grad-CAM-style explanation outputs \cite{patil2026haren}. A recent systematic review of AI in PCOS also highlights that diagnostic and predictive studies increasingly use CNNs, XAI, and multimodal features, but that study quality and validation practices remain uneven \cite{ghaderzadeh2025pcos_ai_review}.
+
+This literature establishes strong interest in PCOS imaging AI, but most papers still emphasize architecture and headline accuracy. In contrast, our study focuses on whether performance remains trustworthy when exact duplicates, pHash near-duplicates, cross-label perceptual conflicts, label-budget variation, threshold selection, calibration, robustness, and explanation sanity checks are evaluated together. This distinction matters because several recent PCOS ultrasound papers use public or small datasets, where patient-level grouping, duplicated frames, repeated resized copies, and class-label conflicts can materially change apparent performance.
+
+The broader ultrasound and medical-imaging literature also motivates a reliability-centered protocol. Self-supervised ultrasound research now includes masked image modeling for ultrasound classification \cite{xu2024masked_ultrasound_ssl}, universal ultrasound foundation modeling for label-efficient cross-organ analysis \cite{jiao2024usfm}, and multi-view self-supervised thyroid-ultrasound diagnosis \cite{wang2024thyroid_ssl}. Recent reviews conclude that SSL can improve label efficiency in medical imaging but that gains depend on modality, dataset scale, pretext task, augmentation design, and downstream evaluation \cite{zeng2024ssl_review,vanberlo2024ssl_survey,laci2025classification_review}. Our SimCLR/BYOL comparison is therefore positioned as an empirical reliability check in a noisy PCOS ultrasound setting rather than as a claim that generic SSL is universally superior.
+
+Finally, recent reporting guidance supports the evaluation choices used here. The 2024 CLAIM update emphasizes transparent dataset description, preprocessing, model development, evaluation, and reproducibility for medical-imaging AI \cite{tejani2024claim}. TRIPOD+AI extends prediction-model reporting for machine-learning systems \cite{collins2024tripod_ai}, while STARD-AI provides AI-specific reporting guidance for diagnostic accuracy studies \cite{sounderajah2025stard_ai}. We align with these directions by reporting split construction, duplicate handling, validation-locked thresholds, uncertainty intervals, calibration, robustness, and code-level reproducibility.
+
 \section{Materials and Methods}\label{sec:methods}
 
 \subsection{Dataset}\label{subsec:dataset}
@@ -216,6 +226,20 @@ Bootstrap AUROC/AUPRC intervals indicate that ranking performance is nearly satu
 
 \begin{figure}[t]
 \centering
+\includegraphics[width=0.95\linewidth]{label_efficiency_tuned_vs_default.png}
+\caption{Default-threshold versus validation-tuned accuracy at 10\% and 50\% label budgets for the matched 10-epoch three-seed comparison. The gap between default and tuned curves shows why threshold selection must be reported separately from representation-learning performance.}
+\label{fig:label_efficiency_tuned}
+\end{figure}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.95\linewidth]{bootstrap_auroc_ci.png}
+\caption{Bootstrap AUROC confidence intervals for representative supervised, SimCLR, and BYOL checkpoints. The overlapping intervals show that ranking metrics are nearly saturated, motivating the additional threshold, calibration, robustness, and XAI analyses.}
+\label{fig:bootstrap_auroc}
+\end{figure}
+
+\begin{figure}[t]
+\centering
 \includegraphics[width=0.95\linewidth]{threshold_accuracy_ci.png}
 \caption{Wilson confidence intervals for validation-selected operating-point accuracy. Thresholds were selected on validation predictions and evaluated once on test predictions.}
 \label{fig:threshold_ci}
@@ -264,9 +288,18 @@ SimCLR e25 50\% e10 & 0.9704 & 0.7397 & 0.4380 & 0.2307 \\
 
 Grad-CAM panels were generated for matched supervised ResNet-18 and SimCLR checkpoints. Randomized-weight sanity checks showed low trained-vs-random Grad-CAM similarity, supporting non-random attribution structure. However, border-mask perturbations increased predicted PCOS probability for some samples. This suggests that explanation panels should be paired with sanity and perturbation tests before being interpreted as anatomical evidence. In this study, Grad-CAM is therefore treated as a reliability audit rather than as proof of clinically meaningful localization.
 
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.95\linewidth]{xai_sanity_summary.png}
+\caption{Summary of Grad-CAM sanity metrics. Low trained-versus-random CAM correlation is desirable, while high border attribution or increased PCOS probability after border masking cautions against interpreting heatmaps as direct anatomical evidence.}
+\label{fig:xai_sanity}
+\end{figure}
+
 \section{Discussion}\label{sec:discussion}
 
 The main finding is not that self-supervised learning universally outperforms supervised transfer. Instead, the study shows that PCOS ultrasound classification on a low-cleanliness public dataset requires a broader reliability protocol. Supervised ResNet-18 remained highly competitive and often strongest, especially at 10\% labels. SimCLR and BYOL nevertheless reached strong validation-selected operating points at 50\% labels, demonstrating that SSL representations are viable when downstream tuning and threshold selection are handled carefully.
+
+Compared with the most recent PCOS ultrasound literature, our results justify a different emphasis. Recent 2024--2026 studies commonly report high accuracy from attention, ensemble, hybrid CNN, or multimodal pipelines \cite{moral2024cystnet,ahmad2024smote,zhao2025automatic_recognition,sundari2025integrative_pcod,tiwari2026attention,saha2026pcosfusionnet,patil2026haren}. Those architectures are valuable, but our audit shows that a high score on a duplicate-heavy public dataset is not enough evidence by itself. The stronger contribution here is the evaluation design: pHash-aware splitting, cross-label group exclusion, validation-locked operating thresholds, uncertainty intervals, calibration, robustness severity, and XAI sanity checks. This protocol can be reused alongside future PCOS-specific architectures, including attention and multimodal models.
 
 This nuance is important for Q1-level medical AI research. A paper claiming only high accuracy on this dataset would be vulnerable to duplicate leakage, near-duplicate leakage, and artifact shortcuts. Our audit found extensive exact and perceptual duplication, including cross-label pHash groups. Excluding these groups and evaluating strict splits substantially strengthens the validity of reported results. It also changes the scientific question from ``which model has the highest clean accuracy?'' to ``which modeling and evaluation protocol remains reliable under label scarcity, threshold constraints, calibration, corruption, and explanation sanity checks?''
 
