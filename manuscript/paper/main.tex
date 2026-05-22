@@ -1,0 +1,332 @@
+%Version 3.1 December 2024
+% Springer Nature article draft for the PCOS SSL project.
+% The template package requests a single .tex manuscript file at submission time.
+
+\documentclass[pdflatex,sn-mathphys-num]{sn-jnl}
+
+\usepackage{graphicx}
+\usepackage{multirow}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{amsthm}
+\usepackage{mathrsfs}
+\usepackage[title]{appendix}
+\usepackage{xcolor}
+\usepackage{textcomp}
+\usepackage{manyfoot}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{makecell}
+
+\graphicspath{{../../reports/figures/}}
+
+\theoremstyle{thmstyleone}
+\newtheorem{theorem}{Theorem}
+\newtheorem{proposition}[theorem]{Proposition}
+\theoremstyle{thmstyletwo}
+\newtheorem{example}{Example}
+\newtheorem{remark}{Remark}
+\theoremstyle{thmstylethree}
+\newtheorem{definition}{Definition}
+
+\raggedbottom
+
+\begin{document}
+
+\title[Duplicate-aware SSL for PCOS ultrasound]{Reliability-Centered Self-Supervised Learning for PCOS Ultrasound Classification Under Duplicate-Aware Evaluation}
+
+\author*[1]{\fnm{Seyam} \sur{Alam}}\email{REPLACE-WITH-EMAIL}
+\author[1]{\fnm{REPLACE} \sur{Coauthor}}\email{REPLACE-WITH-EMAIL}
+
+\affil*[1]{\orgdiv{REPLACE Department or Laboratory}, \orgname{REPLACE Institution}, \orgaddress{\city{REPLACE City}, \country{REPLACE Country}}}
+
+\abstract{Public ultrasound datasets for polycystic ovary syndrome (PCOS) can support rapid artificial-intelligence research, but duplicated images, perceptual near-duplicates, label conflicts, and preprocessing artifacts can inflate apparent performance and obscure clinically relevant failure modes. We present a reliability-centered evaluation protocol for PCOS ultrasound classification using the PCOS-XAI Ultrasound dataset. The protocol audits image readability, exact duplicates, perceptual hashes, cross-label near-duplicate groups, and leakage-aware train/validation/test splits before model fitting. We compare ImageNet-supervised convolutional and transformer baselines with self-supervised SimCLR and BYOL ResNet-18 encoders under low-label downstream fine-tuning. We further evaluate validation-selected operating points, Wilson confidence intervals, bootstrap AUROC/AUPRC intervals, calibration, corruption-severity robustness, and Grad-CAM sanity checks. The local audit found 11,784 readable images, 1,956 exact duplicate groups, 1,788 pHash near-duplicate groups, and 38 cross-label pHash groups that were excluded from strict splits. Under three-seed 10-epoch fine-tuning, supervised ResNet-18 remained strongest at 10\% labels (accuracy 0.9794 +/- 0.0075, AUROC 0.9984 +/- 0.0009), while SimCLR and BYOL became competitive in validation-selected operating points at 50\% labels. SimCLR reached tuned accuracy 0.9939 +/- 0.0025 and BYOL reached 0.9899 +/- 0.0045 at 50\% labels, compared with 0.9931 +/- 0.0044 for supervised ResNet-18. Robustness and XAI analyses revealed that high clean accuracy did not guarantee stability under blur, downsampling, border perturbation, or calibration shifts. These findings support a publishable reliability claim: in low-cleanliness PCOS ultrasound classification, duplicate-aware evaluation, threshold selection, calibration, robustness, and explanation sanity checks are as important as the choice between supervised transfer and self-supervised learning.}
+
+\keywords{polycystic ovary syndrome, ultrasound, self-supervised learning, SimCLR, BYOL, duplicate leakage, medical imaging, calibration, explainable AI}
+
+\maketitle
+
+\section{Introduction}\label{sec:introduction}
+
+Polycystic ovary syndrome (PCOS) is a common endocrine disorder associated with reproductive, metabolic, and psychological health burden. Ultrasound imaging is frequently used in assessment workflows, but image interpretation can vary with acquisition quality, operator skill, and clinical context \cite{teede2018pcos}. Deep learning offers a route toward scalable image triage and decision support; however, public medical image datasets often contain hidden quality issues that can make headline accuracy misleading. In particular, exact duplicates, perceptual near-duplicates, preprocessing artifacts, annotation ambiguity, and split leakage can create models that appear strong on clean test sets but fail under more realistic shifts \cite{degrave2021shortcut,roberts2021common}.
+
+This problem is especially important for public PCOS ultrasound datasets. Many studies emphasize model architecture and classification accuracy, while less attention is paid to dataset cleanliness, duplicate-aware splitting, validation-locked threshold selection, calibration, robustness, and attribution sanity checks. A model trained on duplicated or near-duplicated ultrasound frames may learn a dataset fingerprint rather than ovarian morphology. Similarly, a model with high AUROC may still be unsuitable if the default threshold suppresses sensitivity, if probabilities are poorly calibrated, or if predictions depend on borders and preprocessing shortcuts.
+
+Self-supervised learning (SSL) is attractive in this setting because it can use unlabeled images to learn representations before supervised fine-tuning. Contrastive methods such as SimCLR \cite{chen2020simclr} and non-contrastive bootstrap methods such as BYOL \cite{grill2020byol} have shown strong representation-learning performance in natural images. Yet for noisy medical imaging, the relevant question is not simply whether SSL increases accuracy. The stronger question is whether SSL remains useful under leakage-controlled, low-label, reliability-aware evaluation.
+
+We therefore frame PCOS ultrasound classification as a reliability problem. We audit the PCOS-XAI Ultrasound dataset \cite{ibadeus_pcos_xai}, construct exact-duplicate and pHash near-duplicate-aware splits, compare supervised CNN/ViT/ConvNeXt baselines with SimCLR and BYOL encoders, and evaluate clean metrics alongside operating-point confidence intervals, calibration, robustness severity, and Grad-CAM sanity checks. The central contribution is not a new architecture. It is a reproducible protocol showing how high-performing PCOS ultrasound classifiers behave when duplicate leakage and artifact shortcuts are explicitly examined.
+
+Our contributions are:
+\begin{enumerate}
+    \item A dataset audit for PCOS-XAI ultrasound images including exact duplicates, pHash near-duplicates, split sizes, and cross-label perceptual conflicts.
+    \item A leakage-aware benchmark comparing supervised ImageNet transfer with SimCLR and BYOL self-supervised ResNet-18 encoders under 10\% and 50\% multi-seed low-label protocols.
+    \item Validation-selected operating-point analysis with Wilson confidence intervals, plus bootstrap AUROC/AUPRC intervals from raw prediction exports.
+    \item Calibration, corruption-severity, and Grad-CAM sanity analyses demonstrating that clean accuracy and AUROC can hide reliability failures.
+    \item A reproducible Apple Silicon PyTorch/MPS workflow suitable for local medical-imaging experimentation.
+\end{enumerate}
+
+\section{Materials and Methods}\label{sec:methods}
+
+\subsection{Dataset}\label{subsec:dataset}
+
+We used the PCOS-XAI Ultrasound dataset distributed on Kaggle \cite{ibadeus_pcos_xai}. The local unarchived dataset contained two class folders: \texttt{infected} for PCOS-positive ultrasound images and \texttt{noninfected} for healthy/non-PCOS ultrasound images. All analyses in this manuscript were performed on locally readable images only.
+
+\begin{table}[h]
+\caption{Dataset audit summary. Exact duplicates were computed with file hashes. Near-duplicates were computed with perceptual hashes using Hamming distance $\leq 4$. Cross-label pHash groups were excluded from the strict pHash-aware split.}\label{tab:dataset_audit}
+\begin{tabular}{@{}lr@{}}
+\toprule
+Audit item & Value \\
+\midrule
+Total readable images & 11,784 \\
+PCOS-positive images & 6,784 \\
+Healthy/non-PCOS images & 5,000 \\
+Exact duplicate groups & 1,956 \\
+Exact duplicate files beyond first & 7,788 \\
+pHash near-duplicate groups & 1,788 \\
+pHash near-duplicate files beyond first & 9,448 \\
+Cross-label pHash near-duplicate groups & 38 \\
+pHash-aware train images & 7,453 \\
+pHash-aware validation images & 1,584 \\
+pHash-aware test images & 1,589 \\
+\botrule
+\end{tabular}
+\end{table}
+
+\subsection{Duplicate and near-duplicate control}\label{subsec:duplicates}
+
+Exact duplicates were grouped by file hash. Perceptual near-duplicates were grouped by pHash distance. The pHash audit identified 38 cross-label near-duplicate groups. These groups are important because they indicate visually similar or perceptually identical image content appearing under conflicting labels. The strict split excluded cross-label near-duplicate groups and prevented any pHash near-duplicate group from crossing train, validation, and test partitions. This split was used for the main benchmark because it is more conservative than a random split and directly addresses leakage risk.
+
+\begin{table}[h]
+\caption{Reliability-centered PCOS ultrasound evaluation protocol.}\label{tab:protocol}
+\begin{tabular}{@{}lp{0.75\linewidth}@{}}
+\toprule
+Step & Action \\
+\midrule
+1 & Audit readable images, class labels, dimensions, and modes. \\
+2 & Compute exact duplicate groups using file hashes. \\
+3 & Compute pHash near-duplicate groups and flag cross-label groups. \\
+4 & Exclude cross-label pHash groups from strict evaluation. \\
+5 & Create train/validation/test splits with no duplicate group crossing splits. \\
+6 & Train supervised transfer baselines and SSL encoders on the training split. \\
+7 & Fine-tune downstream classifiers under fixed label budgets and seeds. \\
+8 & Select operating thresholds on validation predictions only. \\
+9 & Evaluate clean metrics, Wilson intervals, bootstrap AUROC/AUPRC intervals, calibration, robustness severity, and Grad-CAM sanity checks. \\
+\botrule
+\end{tabular}
+\end{table}
+
+\subsection{Models}\label{subsec:models}
+
+Supervised baselines used ImageNet-pretrained ResNet-18 \cite{he2016resnet}, EfficientNet-B0 \cite{tan2019efficientnet}, ViT-Tiny \cite{dosovitskiy2021vit}, and ConvNeXt-Tiny \cite{liu2022convnext}. The SSL experiments used a ResNet-18 encoder for both SimCLR \cite{chen2020simclr} and BYOL \cite{grill2020byol} to keep downstream comparisons architecture-matched. SimCLR used a contrastive objective with two augmented views. BYOL used online and target encoders, projection heads, and an exponential moving-average target update. SSL pretraining used all training images without labels, followed by supervised downstream fine-tuning with restricted label fractions.
+
+All training used PyTorch \cite{paszke2019pytorch}, timm \cite{timm}, and scikit-learn \cite{scikit-learn}. Experiments were run locally on an Apple Silicon machine using the PyTorch MPS backend when supported, with 18 CPU threads for data loading and image augmentation. Batch size, workers, and runtime metadata were recorded in each run directory.
+
+\subsection{Training and downstream protocols}\label{subsec:training}
+
+The main pHash-aware benchmark used 10\% and 50\% label budgets with three random seeds (42, 7, and 123) for supervised ResNet-18, SimCLR e25 fine-tuning, and BYOL e25 fine-tuning. The matched SSL comparison used 25 epochs of unlabeled pretraining and 10 downstream fine-tuning epochs. Additional epoch-sensitivity experiments compared one, five, ten, and twenty-five downstream epochs where available.
+
+For each training run, the best checkpoint was selected by validation performance. Final metrics were computed once on the held-out pHash-aware test split. Reported metrics include accuracy, balanced accuracy, sensitivity, specificity, F1, AUROC, AUPRC, expected calibration error (ECE), Brier score, and confusion-matrix counts.
+
+\subsection{Threshold selection and confidence intervals}\label{subsec:thresholds}
+
+Because medical operating points may require high sensitivity or a balanced sensitivity/specificity tradeoff, we evaluated both the default 0.5 threshold and thresholds selected on the validation split. The primary threshold table uses the validation-selected balanced-accuracy operating point and then locks that threshold before test evaluation. Wilson confidence intervals were computed for thresholded test accuracy, sensitivity, and specificity. Raw validation/test predictions were exported for bootstrap AUROC/AUPRC confidence intervals.
+
+\subsection{Calibration, robustness, and explainability}\label{subsec:reliability}
+
+Calibration was evaluated with Brier score, ECE, and negative log-likelihood. Platt scaling and temperature scaling were fit on validation predictions and evaluated on test predictions \cite{guo2017calibration}. Robustness was assessed with severity sweeps over blur, downsampling, contrast changes, cropping, and noise. We report clean accuracy, mean corruption accuracy, worst corruption accuracy, and mean/worst degradation. Grad-CAM \cite{selvaraju2017gradcam} was used for qualitative explanation panels, randomized-weight sanity checks, and border-mask perturbation tests.
+
+\section{Results}\label{sec:results}
+
+\subsection{Duplicate-aware auditing changes the benchmark}\label{subsec:audit_results}
+
+The dataset audit revealed extensive duplication: 7,788 of 11,784 readable files were duplicate copies beyond the first exact group representative, and 9,448 files belonged to pHash near-duplicate groups beyond the first representative. The 38 cross-label pHash groups are particularly important for validity. Several groups had cross-label pHash distance 0, meaning perceptually indistinguishable or near-indistinguishable images appeared under both labels. These findings support using pHash-aware splits as the main benchmark rather than random image-level partitions.
+
+\subsection{Supervised baselines are strong but not uniformly reliable}\label{subsec:baseline_results}
+
+Table~\ref{tab:baselines} summarizes the one-epoch supervised architecture comparison on the pHash-aware split. ResNet-18 achieved the strongest clean accuracy among the first-epoch baselines, but later robustness analysis showed that clean accuracy alone did not imply stability under corruption.
+
+\begin{table}[h]
+\caption{Supervised architecture baselines on the pHash-aware test split. These rows are one-epoch baselines and should be read as architecture probes rather than fully optimized models.}\label{tab:baselines}
+\begin{tabular}{@{}lrrrrr@{}}
+\toprule
+Model & Accuracy & AUROC & AUPRC & F1 & ECE \\
+\midrule
+ResNet-18 & 0.9924 & 0.9994 & 0.9996 & 0.9933 & 0.0183 \\
+EfficientNet-B0 & 0.9635 & 0.9972 & 0.9981 & 0.9681 & 0.0266 \\
+ViT-Tiny & 0.9421 & 0.9986 & 0.9991 & 0.9457 & 0.0386 \\
+ConvNeXt-Tiny & 0.8269 & 0.9565 & 0.9560 & 0.8227 & 0.0446 \\
+\botrule
+\end{tabular}
+\end{table}
+
+\subsection{Matched multi-seed SSL comparison}\label{subsec:ssl_results}
+
+The main matched comparison used supervised ResNet-18, SimCLR e25, and BYOL e25 under 10\% and 50\% label budgets, three seeds, and 10 downstream epochs. Results are shown in Table~\ref{tab:multiseed}. Supervised ResNet-18 remained the most stable and strongest default classifier at 10\% labels. SimCLR was close at 10\% and had the smallest SSL variance. BYOL showed stronger seed-to-seed variability at 10\%, but became competitive at 50\% labels.
+
+\begin{table*}[t]
+\caption{Matched three-seed, 10-downstream-epoch comparison. Tuned accuracy is computed at a validation-selected balanced-accuracy threshold and evaluated once on the test set. Values are mean +/- standard deviation over seeds 42, 7, and 123.}\label{tab:multiseed}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{@{}llrrrrrr@{}}
+\toprule
+Method & Labels & Seeds & Accuracy & AUROC & Tuned accuracy & Tuned sensitivity & Tuned specificity \\
+\midrule
+Supervised ResNet-18 & 10\% & 3 & 0.9794 +/- 0.0075 & 0.9984 +/- 0.0009 & 0.9832 +/- 0.0149 & 0.9828 & 0.9837 \\
+SimCLR e25 fine-tune & 10\% & 3 & 0.9755 +/- 0.0019 & 0.9963 +/- 0.0011 & 0.9759 +/- 0.0080 & 0.9854 & 0.9636 \\
+BYOL e25 fine-tune & 10\% & 3 & 0.9507 +/- 0.0286 & 0.9942 +/- 0.0028 & 0.9675 +/- 0.0172 & 0.9690 & 0.9655 \\
+Supervised ResNet-18 & 50\% & 3 & 0.9931 +/- 0.0044 & 0.9991 +/- 0.0000 & 0.9931 +/- 0.0044 & 0.9966 & 0.9885 \\
+SimCLR e25 fine-tune & 50\% & 3 & 0.9673 +/- 0.0029 & 0.9986 +/- 0.0004 & 0.9939 +/- 0.0025 & 0.9951 & 0.9923 \\
+BYOL e25 fine-tune & 50\% & 3 & 0.9734 +/- 0.0173 & 0.9981 +/- 0.0004 & 0.9899 +/- 0.0045 & 0.9948 & 0.9837 \\
+\botrule
+\end{tabular}
+}
+\end{table*}
+
+The practical interpretation is nuanced. SSL did not universally beat supervised transfer, but both SimCLR and BYOL produced clinically plausible validation-selected operating points at 50\% labels. At 10\% labels, supervised transfer remained the safest default; BYOL's higher variance suggests non-contrastive SSL may require further tuning or stronger augmentation control in low-label PCOS ultrasound settings.
+
+\subsection{Operating-point analysis changes the ranking}\label{subsec:op_results}
+
+Table~\ref{tab:thresholds} compares key 50\% label operating points with Wilson confidence intervals. Supervised ResNet-18 at five epochs had the strongest tuned accuracy in the seed-42 setting. SimCLR at 10 epochs and BYOL at 10 epochs were close, with high sensitivity and specificity after validation-selected thresholding.
+
+\begin{table*}[t]
+\caption{Key 50\% label validation-selected operating points with Wilson 95\% confidence intervals. Thresholds were selected on validation predictions and locked before test evaluation.}\label{tab:thresholds}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{@{}lrrrrrr@{}}
+\toprule
+Model & Epochs & Tuned acc & 95\% CI & Sensitivity & Specificity & AUROC \\
+\midrule
+Supervised ResNet-18 & 5 & 0.9981 & 0.9945--0.9994 & 0.9966 & 1.0000 & 0.9995 \\
+SimCLR e25 fine-tune & 10 & 0.9924 & 0.9868--0.9957 & 0.9955 & 0.9885 & 0.9991 \\
+BYOL e25 fine-tune & 10 & 0.9937 & 0.9885--0.9966 & 0.9955 & 0.9914 & 0.9985 \\
+SimCLR e25 fine-tune & 25 & 0.9843 & 0.9769--0.9893 & 0.9966 & 0.9684 & 0.9992 \\
+\botrule
+\end{tabular}
+}
+\end{table*}
+
+\subsection{Ranking metrics are nearly saturated}\label{subsec:bootstrap_results}
+
+Bootstrap AUROC/AUPRC intervals indicate that ranking performance is nearly saturated for the strongest supervised and SSL checkpoints. For example, supervised ResNet-18 at 50\% labels and five epochs had AUROC 0.9995 with bootstrap 95\% CI 0.9987--1.0000, SimCLR e25 at 50\% labels and 10 epochs had AUROC 0.9991 with CI 0.9980--0.9999, and BYOL e25 at 50\% labels and 10 epochs had AUROC 0.9985 with CI 0.9966--1.0000. These overlapping intervals reinforce that AUROC differences alone are not the most meaningful manuscript claim.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.95\linewidth]{seed_summary_accuracy.png}
+\caption{Multi-seed accuracy summary for supervised transfer, SimCLR, and BYOL. The figure is generated from \texttt{reports/seed\_summary.csv}.}
+\label{fig:seed_summary}
+\end{figure}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.95\linewidth]{threshold_accuracy_ci.png}
+\caption{Wilson confidence intervals for validation-selected operating-point accuracy. Thresholds were selected on validation predictions and evaluated once on test predictions.}
+\label{fig:threshold_ci}
+\end{figure}
+
+\subsection{Calibration improves some models but is not universally beneficial}\label{subsec:calibration_results}
+
+Calibration analysis showed that post-hoc scaling can materially improve reliability for under-calibrated checkpoints, but the effect is model-dependent. The supervised ResNet-18 50\% five-epoch checkpoint had a strong uncalibrated Brier score of 0.0043. BYOL 50\% 10-epoch had uncalibrated Brier score 0.0120 and improved to 0.0043 after Platt scaling. SimCLR 50\% 25-epoch had low ECE, but its validation-selected specificity was weaker than the SimCLR 10-epoch operating point. Thus calibration should be interpreted alongside threshold behavior, not as an isolated score.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.95\linewidth]{calibration_curves.png}
+\caption{Calibration curves for exported prediction files. Calibration is evaluated after validation/test prediction export, enabling comparison between uncalibrated, Platt-scaled, and temperature-scaled outputs.}
+\label{fig:calibration_curves}
+\end{figure}
+
+\subsection{Robustness severity reveals architecture-specific failure modes}\label{subsec:robustness_results}
+
+Clean accuracy did not predict robustness. Table~\ref{tab:robustness} summarizes severity-sweep results. ViT-Tiny had the best mean corruption accuracy despite lower clean accuracy than ResNet-18. ResNet-18 and SimCLR were especially vulnerable to blur and downsampling. The SimCLR 50\% e10 checkpoint was competitive on clean metrics but had the largest mean degradation in the severity sweep.
+
+\begin{table}[h]
+\caption{Robustness severity summary. Mean and worst degradation are computed across corruption types and severity levels.}\label{tab:robustness}
+\tiny
+\setlength{\tabcolsep}{2pt}
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+Model & Clean & Mean corrupt & Worst corrupt & Mean drop \\
+\midrule
+ViT-Tiny supervised & 0.9421 & 0.9107 & 0.8439 & 0.0314 \\
+EfficientNet-B0 supervised & 0.9635 & 0.8455 & 0.7212 & 0.1180 \\
+ConvNeXt-Tiny supervised & 0.8269 & 0.7156 & 0.5425 & 0.1113 \\
+ResNet-18 supervised & 0.9924 & 0.7982 & 0.5916 & 0.1942 \\
+SimCLR e25 50\% e10 & 0.9704 & 0.7397 & 0.4380 & 0.2307 \\
+\botrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.95\linewidth]{robustness_severity_summary.png}
+\caption{Robustness severity summary across blur, downsampling, contrast, crop, and noise transformations. High clean accuracy does not guarantee corruption stability.}
+\label{fig:robustness}
+\end{figure}
+
+\subsection{Grad-CAM sanity checks caution against naive explanation use}\label{subsec:xai_results}
+
+Grad-CAM panels were generated for matched supervised ResNet-18 and SimCLR checkpoints. Randomized-weight sanity checks showed low trained-vs-random Grad-CAM similarity, supporting non-random attribution structure. However, border-mask perturbations increased predicted PCOS probability for some samples. This suggests that explanation panels should be paired with sanity and perturbation tests before being interpreted as anatomical evidence. In this study, Grad-CAM is therefore treated as a reliability audit rather than as proof of clinically meaningful localization.
+
+\section{Discussion}\label{sec:discussion}
+
+The main finding is not that self-supervised learning universally outperforms supervised transfer. Instead, the study shows that PCOS ultrasound classification on a low-cleanliness public dataset requires a broader reliability protocol. Supervised ResNet-18 remained highly competitive and often strongest, especially at 10\% labels. SimCLR and BYOL nevertheless reached strong validation-selected operating points at 50\% labels, demonstrating that SSL representations are viable when downstream tuning and threshold selection are handled carefully.
+
+This nuance is important for Q1-level medical AI research. A paper claiming only high accuracy on this dataset would be vulnerable to duplicate leakage, near-duplicate leakage, and artifact shortcuts. Our audit found extensive exact and perceptual duplication, including cross-label pHash groups. Excluding these groups and evaluating strict splits substantially strengthens the validity of reported results. It also changes the scientific question from ``which model has the highest clean accuracy?'' to ``which modeling and evaluation protocol remains reliable under label scarcity, threshold constraints, calibration, corruption, and explanation sanity checks?''
+
+The SSL comparison also provides a useful negative result. SimCLR and BYOL are not automatic remedies for noisy medical data. BYOL was competitive at 50\% labels but more variable at 10\% labels. SimCLR had strong 50\% operating points, but robustness severity sweeps showed that SSL fine-tuning did not guarantee corruption robustness. These results support a reliability-centered manuscript claim rather than a simplistic SSL superiority claim.
+
+Several implications follow. First, PCOS ultrasound benchmarks should report duplicate-aware split construction and cross-label duplicate handling. Second, AUROC should be accompanied by threshold-locked sensitivity/specificity and confidence intervals. Third, calibration and robustness should be treated as core evaluation axes, especially if a classifier is proposed for screening or triage. Fourth, visual explanations should undergo sanity and perturbation checks before being described as clinically meaningful.
+
+\section{Limitations}\label{sec:limitations}
+
+This study uses a single public dataset and does not establish external clinical generalization. The pHash grouping strategy is conservative but imperfect: it can miss semantic duplicates and can group visually similar but clinically distinct images. Some architecture baselines were intentionally short probes rather than exhaustively optimized models. The robustness suite uses synthetic perturbations, which approximate but do not fully reproduce acquisition shifts across ultrasound machines, sonographers, and institutions. Finally, Grad-CAM is only one explanation method and cannot prove causal anatomical reasoning.
+
+\section{Conclusion}\label{sec:conclusion}
+
+In a duplicate-heavy public PCOS ultrasound dataset, reliability-aware evaluation changes the interpretation of AI performance. Supervised transfer remains a strong baseline, while SimCLR and BYOL self-supervised encoders can become competitive under validation-selected operating points, especially at 50\% labels. However, clean accuracy and AUROC alone are insufficient: duplicate control, threshold confidence intervals, calibration, robustness severity, and explanation sanity checks reveal clinically relevant differences that a leaderboard-style evaluation would miss. The resulting protocol provides a stronger foundation for future PCOS ultrasound AI studies and for subsequent external validation.
+
+\backmatter
+
+\bmhead{Supplementary information}
+
+Supplementary material should include the full experiment ledger, run configuration files, pHash grouping metadata, additional threshold tables, calibration outputs, robustness severity curves, and Grad-CAM sanity panels where redistribution is allowed by dataset licensing.
+
+\bmhead{Acknowledgements}
+
+The authors acknowledge the maintainers of the PCOS-XAI Ultrasound dataset and the open-source PyTorch, timm, scikit-learn, and Python scientific-computing communities.
+
+\section*{Declarations}
+
+\bmhead{Funding}
+Not applicable. Replace with grant information if applicable.
+
+\bmhead{Conflict of interest}
+The authors declare no competing interests. Replace if applicable.
+
+\bmhead{Ethics approval and consent to participate}
+This study used a publicly available de-identified Kaggle dataset and did not involve new recruitment, intervention, or direct access to identifiable patient records. Authors should verify the final journal's policy and institutional requirements before submission.
+
+\bmhead{Consent for publication}
+Not applicable for this secondary analysis of a public dataset. Replace if journal or institutional policy requires additional wording.
+
+\bmhead{Data availability}
+The source dataset is available from Kaggle as the PCOS-XAI Ultrasound Dataset \cite{ibadeus_pcos_xai}. Derived metadata and scripts are available in the project repository, excluding raw dataset files and image derivatives where redistribution may be restricted.
+
+\bmhead{Code availability}
+The analysis code, experiment scripts, report tables, and manuscript source are available at \url{https://github.com/Seyamalam/pcos-ssl-mps}. Raw dataset folders, model checkpoints, run artifacts, and image derivatives are excluded from version control.
+
+\bmhead{Author contribution}
+S.A. designed the study, implemented the pipeline, ran experiments, analyzed results, and drafted the manuscript. Additional author contributions should be added before submission.
+
+\begin{appendices}
+
+\section{Reproducibility details}\label{app:reproducibility}
+
+The primary split file is the pHash near-duplicate-aware split in the repository metadata folder. The main summary tables are generated from the all-results, seed-summary, threshold-summary, threshold-confidence, bootstrap-AUC, and manuscript-table report files. BYOL pretraining used the BYOL YAML configuration; SimCLR and supervised baselines used the corresponding configuration and training scripts in the repository.
+
+\section{Candidate manuscript extensions}\label{app:extensions}
+
+Future extensions include external validation, a prospective data-collection protocol, DINO or masked autoencoder SSL with ViT encoders, stronger ultrasound-specific augmentations, and reader-study comparison against expert sonographers.
+
+\end{appendices}
+
+\bibliography{references}
+
+\end{document}
