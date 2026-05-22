@@ -9,6 +9,7 @@ Companion research notes:
 - [Experiment ledger](docs/EXPERIMENTS.md)
 - [Decision log](docs/DECISIONS.md)
 - [Manuscript notes](docs/MANUSCRIPT_NOTES.md)
+- [Manuscript draft](docs/MANUSCRIPT_DRAFT.md)
 
 ## Research Goal
 
@@ -290,6 +291,16 @@ Status:
 - [x] Run first full fine-tuning experiments.
 - [x] Run 10% and 50% downstream epoch-sensitivity experiments.
 - [x] Add Wilson confidence intervals for threshold-selected operating points.
+- [x] Run 10% and 50% multi-seed 10-epoch supervised vs SimCLR fine-tuning sweep.
+
+Multi-seed 10-epoch summary:
+
+| Method | Label budget | Seeds | Default acc mean +/- std | AUROC mean +/- std | Tuned acc mean +/- std | Tuned sensitivity mean | Tuned specificity mean |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| Supervised ResNet-18 | 10% | 3 | 0.9794 +/- 0.0075 | 0.9984 +/- 0.0009 | 0.9832 +/- 0.0149 | 0.9828 | 0.9837 |
+| SimCLR e25 fine-tune | 10% | 3 | 0.9755 +/- 0.0019 | 0.9963 +/- 0.0011 | 0.9759 +/- 0.0080 | 0.9854 | 0.9636 |
+| Supervised ResNet-18 | 50% | 3 | 0.9931 +/- 0.0044 | 0.9991 +/- 0.0000 | 0.9931 +/- 0.0044 | 0.9966 | 0.9885 |
+| SimCLR e25 fine-tune | 50% | 3 | 0.9673 +/- 0.0029 | 0.9986 +/- 0.0004 | 0.9939 +/- 0.0025 | 0.9951 | 0.9923 |
 
 ### Phase 5: Robustness and Artifact Tests
 
@@ -332,10 +343,11 @@ Evaluation:
 
 Status:
 
-- [ ] Implement Grad-CAM pipeline.
-- [ ] Generate explanation samples.
-- [ ] Run explanation stability tests.
-- [ ] Document failure cases.
+- [x] Implement Grad-CAM pipeline.
+- [x] Generate supervised vs SSL explanation samples.
+- [x] Run trained-vs-random Grad-CAM sanity checks.
+- [x] Run border-mask perturbation checks.
+- [x] Document failure cases and cautionary findings.
 
 ## Planned Repository Structure
 

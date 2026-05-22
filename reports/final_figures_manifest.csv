@@ -1,0 +1,9 @@
+figure,path,source
+seed_summary_accuracy,reports/figures/seed_summary_accuracy.png,reports/seed_summary.csv
+threshold_accuracy_ci,reports/figures/threshold_accuracy_ci.png,reports/threshold_confidence_intervals.csv
+calibration_brier_improvement,reports/figures/calibration_brier_improvement.png,reports/calibration_improvement.csv
+robustness_severity_accuracy,reports/figures/robustness_severity_accuracy.png,existing report
+robustness_severity_summary,reports/figures/robustness_severity_summary.png,existing report
+robustness_condition_heatmap,reports/figures/robustness_condition_heatmap.png,existing report
+calibration_curves,reports/figures/calibration_curves.png,existing report
+cross_label_phash_examples,reports/figures/cross_label_phash_examples.png,existing report

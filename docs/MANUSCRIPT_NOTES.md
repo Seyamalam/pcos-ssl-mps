@@ -54,6 +54,12 @@ The cross-label pHash inspection is now concrete. All 38 cross-label pHash group
 
 Grad-CAM comparison panels have been generated for supervised ResNet-18 50% e5 and SimCLR ResNet-18 50% e10 on matched test images. These are useful for qualitative inspection, but they should remain a supporting analysis until randomized-weight sanity checks and artifact-mask checks are added.
 
+The 10-epoch multi-seed block is now complete for 10% and 50% labels. At 10% labels, supervised ResNet-18 remains slightly ahead on mean default accuracy (0.9794 vs 0.9755) and AUROC (0.9984 vs 0.9963), while SimCLR has slightly higher mean validation-selected sensitivity (0.9854 vs 0.9828) but lower specificity. At 50% labels, supervised ResNet-18 has higher mean default accuracy (0.9931 vs 0.9673), but SimCLR's validation-selected operating point is highly competitive (0.9939 tuned accuracy, 0.9951 sensitivity, 0.9923 specificity). This is a strong operating-point result but not a simple SSL superiority result.
+
+Calibration improvement experiments show that Platt scaling often improves under-calibrated 10-epoch models, especially SimCLR 10% and 50% e10 checkpoints, but can overcorrect already strong high-epoch SimCLR models. Temperature scaling is more conservative. Calibration should therefore be framed as a reliability post-processing analysis rather than a universal improvement claim.
+
+Grad-CAM sanity checks are now complete for supervised ResNet-18 50% e5 and SimCLR 50% e10. Trained-vs-random Grad-CAM similarity is low, supporting non-random attribution structure. However, border-mask perturbation can increase PCOS probability for some cases, which is a cautionary artifact-sensitivity finding. This should be discussed as evidence that XAI panels need sanity checks and perturbation tests before clinical interpretation.
+
 The first one-epoch label-efficiency pass suggests supervised ImageNet-pretrained ResNet-18 is already strong with small label fractions, but low-label runs can be poorly calibrated. Repeated seeds and longer fine-tuning are needed before making final low-label claims.
 
 ## Important Caution
@@ -74,6 +80,7 @@ The pHash audit found 38 cross-label near-duplicate groups. These must be inspec
 10. Calibration table with Brier score and ECE.
 11. Cross-label pHash near-duplicate inspection table.
 12. Grad-CAM comparison panel.
+13. Multi-seed summary table.
 
 ## Planned Figures
 
@@ -83,6 +90,9 @@ The pHash audit found 38 cross-label near-duplicate groups. These must be inspec
 4. Label-efficiency curve.
 5. Robustness degradation bar chart.
 6. Grad-CAM comparison panel for supervised vs SSL.
+7. Seed summary accuracy plot.
+8. Threshold-selected accuracy CI plot.
+9. Calibration improvement plot.
 
 ## Candidate Journals
 

@@ -10,7 +10,7 @@ from rich.console import Console
 
 RUN_PATTERN = re.compile(
     r"^(?P<family>resnet18_supervised_phash|simclr_resnet18_phash_e25_finetune)_"
-    r"(?P<label>\d+pct)(?:_seed(?P<seed>\d+))?_e1$"
+    r"(?P<label>\d+pct)(?:_seed(?P<seed>\d+))?_e(?P<epochs>\d+)$"
 )
 
 
@@ -31,12 +31,19 @@ def add_run_metadata(frame: pd.DataFrame) -> pd.DataFrame:
         if not match:
             continue
         label = match.group("label")
-        if label not in {"10pct", "25pct"}:
+        if label not in {"10pct", "25pct", "50pct"}:
             continue
         method = "supervised_resnet18" if match.group("family") == "resnet18_supervised_phash" else "simclr_e25_finetune"
         seed = int(match.group("seed") or 42)
         enriched = row.to_dict()
-        enriched.update({"method": method, "label_fraction": label, "seed": seed})
+        enriched.update(
+            {
+                "method": method,
+                "label_fraction": label,
+                "seed": seed,
+                "epochs": int(match.group("epochs")),
+            }
+        )
         rows.append(enriched)
     return pd.DataFrame(rows)
 
@@ -57,13 +64,18 @@ def main() -> None:
     )
 
     rows = []
-    for (method, label_fraction), group in results.groupby(["method", "label_fraction"]):
+    for (method, label_fraction, epochs), group in results.groupby(
+        ["method", "label_fraction", "epochs"]
+    ):
         threshold_group = thresholds[
-            (thresholds["method"] == method) & (thresholds["label_fraction"] == label_fraction)
+            (thresholds["method"] == method)
+            & (thresholds["label_fraction"] == label_fraction)
+            & (thresholds["epochs"] == epochs)
         ]
         row = {
             "method": method,
             "label_fraction": label_fraction,
+            "epochs": int(epochs),
             "n_seeds": int(group["seed"].nunique()),
             "seeds": " ".join(str(seed) for seed in sorted(group["seed"].unique())),
         }
@@ -78,7 +90,7 @@ def main() -> None:
             row.update(summarize(threshold_group, metric))
         rows.append(row)
 
-    summary = pd.DataFrame(rows).sort_values(["label_fraction", "method"])
+    summary = pd.DataFrame(rows).sort_values(["label_fraction", "epochs", "method"])
     args.output_csv.parent.mkdir(parents=True, exist_ok=True)
     summary.to_csv(args.output_csv, index=False)
     Console().print(f"Wrote {args.output_csv}")
@@ -86,6 +98,7 @@ def main() -> None:
         columns = [
             "method",
             "label_fraction",
+            "epochs",
             "n_seeds",
             "accuracy_mean",
             "accuracy_std",

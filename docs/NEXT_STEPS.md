@@ -4,9 +4,9 @@ Working queue for the PCOS SSL manuscript experiments.
 
 ## Immediate Priorities
 
-1. Run repeated seeds for the current supervised and SimCLR label-efficiency experiments.
-   - Fractions: 5%, 10%, 25%, 50%.
-   - Minimum seeds: 3. Completed for 10% and 25%.
+1. Extend repeated seeds for the current supervised and SimCLR label-efficiency experiments.
+   - Fractions completed with 3 seeds: 10% and 50% at 10 downstream epochs; 10% and 25% at one downstream epoch.
+   - Remaining useful fractions: 5% and 25% with longer downstream tuning.
    - Target seeds: 5 if runtime allows.
    - Report mean, standard deviation, and confidence intervals.
 
@@ -22,7 +22,8 @@ Working queue for the PCOS SSL manuscript experiments.
    - Wilson confidence intervals have been added for balanced-accuracy-selected tuned accuracy, sensitivity, and specificity.
    - Raw validation/test predictions and AUROC/AUPRC bootstrap confidence intervals have been added for the main manuscript operating points.
    - Calibration plots and Brier score have been added.
-   - Next: add temperature scaling or Platt calibration if calibration becomes a main claim.
+   - Platt and temperature scaling experiments are complete for the main prediction exports.
+   - Next: decide whether calibrated probabilities belong in the main paper or supplementary material.
 
 4. Add more SSL methods.
    - BYOL as the next non-contrastive method.
@@ -36,11 +37,10 @@ Working queue for the PCOS SSL manuscript experiments.
    - Robustness plots have been generated.
    - Next: decide which severity table belongs in the main manuscript.
 
-6. Add explainability stability.
-   - Generate Grad-CAM grids for supervised ResNet-18, ViT-Tiny, and SimCLR fine-tuned ResNet-18.
-   - Compare clean vs corrupted images.
-   - Add sanity checks with randomized weights.
-   - Initial supervised vs SimCLR Grad-CAM comparison panels are generated.
+6. Expand explainability stability.
+   - Grad-CAM grids and supervised-vs-SimCLR panels are generated.
+   - Randomized-weight sanity checks and border-mask perturbation checks are complete for supervised ResNet-18 50% e5 and SimCLR 50% e10.
+   - Next: add occlusion sensitivity or Eigen-CAM only if the paper needs a second XAI method.
 
 ## Current Interpretation
 
@@ -50,7 +50,6 @@ The 10% downstream epoch-sensitivity block shows SimCLR improves strongly with l
 
 ## Blockers To Resolve
 
-- Add multi-seed experiment runner to avoid manual command loops.
+- Decide whether to extend the multi-seed runner to 5%/25% longer downstream runs.
 - Decide whether to include random image split only as a leakage demonstration.
-- Add Grad-CAM randomized-weight sanity checks.
-- Add artifact-mask XAI stability checks.
+- Decide which final figure set goes into main manuscript vs supplement.

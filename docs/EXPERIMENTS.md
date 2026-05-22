@@ -270,3 +270,41 @@ Three-seed summary for the first manuscript-grade repeat block. Seeds are 42, 7,
 |---|---|---|---|
 | 2026-05-21 | Tiny supervised smoke tests | Validation subsets contained one class due to ordered first batches. | Keep as runtime tests only; never report as model performance. |
 | 2026-05-21 | Robustness with persistent workers | DataLoader cleanup hung after repeated transformed test passes. | Use `persistent_workers=False`; use `num_workers=0` for robustness scripts when reliability matters. |
+
+## 2026-05-22: XAI Sanity, Calibration Improvement, Multi-Seed Sweep, and Manuscript Assets
+
+**Goal**
+
+Move from promising experiments toward manuscript-grade evidence: sanity-check explanations, improve calibration analysis, repeat key 10-epoch low-label runs across seeds, and regenerate final tables/figures.
+
+**What was added**
+
+- `scripts/generate_xai_sanity_checks.py`
+- `scripts/calibrate_predictions.py`
+- `scripts/run_multiseed_experiments.py`
+- `scripts/build_final_figures.py`
+- `docs/MANUSCRIPT_DRAFT.md`
+
+**Key outputs**
+
+- `reports/xai_sanity_checks.csv`
+- `reports/calibration_improvement.csv`
+- `reports/multiseed_plan.csv`
+- `reports/seed_summary.csv`
+- `reports/final_figures_manifest.csv`
+- `reports/manuscript_tables.md`
+
+**Main results**
+
+- 10% labels, 10 epochs, 3 seeds:
+  - Supervised ResNet-18: default accuracy `0.9794 +/- 0.0075`, AUROC `0.9984 +/- 0.0009`.
+  - SimCLR e25 fine-tune: default accuracy `0.9755 +/- 0.0019`, AUROC `0.9963 +/- 0.0011`.
+- 50% labels, 10 epochs, 3 seeds:
+  - Supervised ResNet-18: default accuracy `0.9931 +/- 0.0044`, AUROC `0.9991 +/- 0.0000`.
+  - SimCLR e25 fine-tune: default accuracy `0.9673 +/- 0.0029`, AUROC `0.9986 +/- 0.0004`, validation-selected accuracy `0.9939 +/- 0.0025`.
+- Platt scaling improved Brier score for several under-calibrated supervised/SimCLR 10-epoch models, but overcorrected some already strong checkpoints.
+- Grad-CAM sanity checks showed low trained-vs-random similarity, but border masking can raise PCOS probability in some cases.
+
+**Interpretation**
+
+The strongest paper angle is not "SSL beats supervised." The stronger contribution is a reliability-centered protocol for low-cleanliness PCOS ultrasound classification: leakage-aware splits, low-label multi-seed comparison, threshold-selected clinical operating points, calibration, robustness severity, and XAI sanity checks.

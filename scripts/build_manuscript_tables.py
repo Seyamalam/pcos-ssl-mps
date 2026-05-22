@@ -142,6 +142,25 @@ def main() -> None:
     calibration = pd.read_csv(args.reports_root / "calibration_summary.csv")
     calibration_table = calibration[["run_id", "brier_score", "ece"]].sort_values("brier_score")
 
+    seed_summary = pd.read_csv(args.reports_root / "seed_summary.csv")
+    seed_table = seed_summary[
+        [
+            "method",
+            "label_fraction",
+            "epochs",
+            "n_seeds",
+            "seeds",
+            "accuracy_mean",
+            "accuracy_std",
+            "auroc_mean",
+            "auroc_std",
+            "selected_accuracy_mean",
+            "selected_accuracy_std",
+            "selected_sensitivity_mean",
+            "selected_specificity_mean",
+        ]
+    ]
+
     cross_label = pd.read_csv(args.reports_root / "cross_label_phash_groups.csv")
     cross_label_table = cross_label[
         [
@@ -162,6 +181,7 @@ def main() -> None:
         "threshold_operating_points_ci": threshold_table,
         "bootstrap_ranking_ci": bootstrap_table,
         "calibration": calibration_table,
+        "multi_seed_summary": seed_table,
         "robustness_severity": robustness_table,
         "cross_label_phash_examples": cross_label_table,
     }
@@ -175,6 +195,7 @@ def main() -> None:
         markdown_table("Threshold Operating Points With Wilson CIs", threshold_table),
         markdown_table("Bootstrap AUROC/AUPRC CIs", bootstrap_table),
         markdown_table("Calibration", calibration_table),
+        markdown_table("Multi-Seed Summary", seed_table),
         markdown_table("Robustness Severity", robustness_table),
         markdown_table("Cross-Label pHash Examples", cross_label_table),
     ]
