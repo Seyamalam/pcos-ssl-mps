@@ -5,6 +5,10 @@ threshold_accuracy_ci,reports/figures/threshold_accuracy_ci.png,reports/threshol
 bootstrap_auroc_ci,reports/figures/bootstrap_auroc_ci.png,reports/bootstrap_auc_ci.csv
 calibration_brier_improvement,reports/figures/calibration_brier_improvement.png,reports/calibration_improvement.csv
 xai_sanity_summary,reports/figures/xai_sanity_summary.png,reports/xai_sanity_checks.csv
+dataset_sample_panel,reports/figures/dataset_sample_panel.png,existing report
+duplicate_conflict_panel,reports/figures/duplicate_conflict_panel.png,existing report
+gradcam_comparison_panel,reports/figures/gradcam_comparison_panel.png,existing report
+gradcam_sanity_panel,reports/figures/gradcam_sanity_panel.png,existing report
 robustness_severity_accuracy,reports/figures/robustness_severity_accuracy.png,existing report
 robustness_severity_summary,reports/figures/robustness_severity_summary.png,existing report
 robustness_condition_heatmap,reports/figures/robustness_condition_heatmap.png,existing report

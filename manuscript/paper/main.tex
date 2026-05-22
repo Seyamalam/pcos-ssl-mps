@@ -37,7 +37,7 @@
 
 \author*[1]{\fnm{Touhidul Alam} \sur{Seyam}}\email{touhidulalam@bgctub.ac.bd}
 \author[1]{\fnm{Afrin Sultana} \sur{Niharika}}\email{afrin.niharika@bgctub.ac.bd}
-\author[1]{\fnm{Shafiul Azam} \sur{Mahin}}\email{shafiul.mahin@bgctub.ac.bd}
+\author[1]{\fnm{Shafiul Azam} \sur{Mahin}}\email{azamshafiul37@gmail.com}
 \author[1]{\fnm{Chandnin Baria} \sur{Jowthi}}\email{chandnin.jowthi@bgctub.ac.bd}
 
 \affil*[1]{\orgdiv{Department of Computer Science \& Engineering}, \orgname{BGC Trust University Bangladesh}, \orgaddress{\city{Chattogram}, \country{Bangladesh}}}
@@ -83,6 +83,13 @@ Finally, recent reporting guidance supports the evaluation choices used here. Th
 
 We used the PCOS-XAI Ultrasound dataset distributed on Kaggle \cite{ibadeus_pcos_xai}. The local unarchived dataset contained two class folders: \texttt{infected} for PCOS-positive ultrasound images and \texttt{noninfected} for healthy/non-PCOS ultrasound images. All analyses in this manuscript were performed on locally readable images only.
 
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.90\linewidth]{dataset_sample_panel.png}
+\caption{Representative readable ultrasound images from the local PCOS-XAI dataset copy. The panel shows healthy/non-PCOS and PCOS-positive examples used to contextualize the binary classification task; these examples are illustrative and are not intended as standalone clinical diagnostic evidence.}
+\label{fig:dataset_samples}
+\end{figure}
+
 \begin{table}[h]
 \caption{Dataset audit summary. Exact duplicates were computed with file hashes. Near-duplicates were computed with perceptual hashes using Hamming distance $\leq 4$. Cross-label pHash groups were excluded from the strict pHash-aware split.}\label{tab:dataset_audit}
 \begin{tabular}{@{}lr@{}}
@@ -107,6 +114,13 @@ pHash-aware test images & 1,589 \\
 \subsection{Duplicate and near-duplicate control}\label{subsec:duplicates}
 
 Exact duplicates were grouped by file hash. Perceptual near-duplicates were grouped by pHash distance. The pHash audit identified 38 cross-label near-duplicate groups. These groups are important because they indicate visually similar or perceptually identical image content appearing under conflicting labels. The strict split excluded cross-label near-duplicate groups and prevented any pHash near-duplicate group from crossing train, validation, and test partitions. This split was used for the main benchmark because it is more conservative than a random split and directly addresses leakage risk.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.95\linewidth]{duplicate_conflict_panel.png}
+\caption{Examples of cross-label pHash near-duplicate groups. Each pair shows visually similar ultrasound content appearing with conflicting healthy/non-PCOS and PCOS-positive labels, motivating group-level exclusion and duplicate-aware split construction.}
+\label{fig:duplicate_conflicts}
+\end{figure}
 
 \begin{table}[h]
 \caption{Reliability-centered PCOS ultrasound evaluation protocol.}\label{tab:protocol}
@@ -289,6 +303,20 @@ SimCLR e25 50\% e10 & 0.9704 & 0.7397 & 0.4380 & 0.2307 \\
 \subsection{Grad-CAM sanity checks caution against naive explanation use}\label{subsec:xai_results}
 
 Grad-CAM panels were generated for matched supervised ResNet-18 and SimCLR checkpoints. Randomized-weight sanity checks showed low trained-vs-random Grad-CAM similarity, supporting non-random attribution structure. However, border-mask perturbations increased predicted PCOS probability for some samples. This suggests that explanation panels should be paired with sanity and perturbation tests before being interpreted as anatomical evidence. In this study, Grad-CAM is therefore treated as a reliability audit rather than as proof of clinically meaningful localization.
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\textwidth]{gradcam_comparison_panel.png}
+\caption{Qualitative Grad-CAM comparison for representative healthy/non-PCOS and PCOS-positive examples. The panel contrasts supervised ResNet-18 and SimCLR checkpoints and is used to inspect whether attention patterns are visually plausible across model families.}
+\label{fig:gradcam_comparison}
+\end{figure*}
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\textwidth]{gradcam_sanity_panel.png}
+\caption{Grad-CAM sanity and perturbation examples. Trained, randomized, and border-masked explanations are shown to avoid overinterpreting heatmaps and to identify cases where image framing or non-anatomical regions may influence predictions.}
+\label{fig:gradcam_sanity_panel}
+\end{figure*}
 
 \begin{figure}[t]
 \centering

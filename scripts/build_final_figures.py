@@ -293,6 +293,10 @@ def main() -> None:
     )
 
     existing = [
+        "dataset_sample_panel.png",
+        "duplicate_conflict_panel.png",
+        "gradcam_comparison_panel.png",
+        "gradcam_sanity_panel.png",
         "robustness_severity_accuracy.png",
         "robustness_severity_summary.png",
         "robustness_condition_heatmap.png",
