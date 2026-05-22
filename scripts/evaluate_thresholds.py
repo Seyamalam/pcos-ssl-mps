@@ -4,6 +4,7 @@ import argparse
 import json
 from pathlib import Path
 
+import pandas as pd
 import torch
 from rich.console import Console
 from torch.utils.data import DataLoader
@@ -27,6 +28,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--batch-size", type=int, default=64)
     parser.add_argument("--num-workers", type=int, default=8)
     parser.add_argument("--min-sensitivity", type=float, default=0.90)
+    parser.add_argument(
+        "--output-predictions-csv",
+        type=Path,
+        default=None,
+        help="Optional CSV containing validation/test labels and positive-class probabilities.",
+    )
     return parser.parse_args()
 
 
@@ -82,6 +89,15 @@ def evaluate_selected_thresholds(
     return results
 
 
+def prediction_frame(split: str, dataset: PCOSImageDataset, y_true: list[int], y_prob: list[float]):
+    frame = dataset.frame[["image_id", "rel_path", "label", "split"]].copy()
+    frame["split"] = split
+    frame["y_true"] = y_true
+    frame["y_prob"] = y_prob
+    frame["y_pred_default"] = (frame["y_prob"] >= 0.5).astype(int)
+    return frame
+
+
 def main() -> None:
     args = parse_args()
     runtime = configure_runtime(seed=42, cpu_threads=18)
@@ -115,6 +131,19 @@ def main() -> None:
     with args.output_json.open("w", encoding="utf-8") as handle:
         json.dump(result, handle, indent=2)
     Console().print(f"Wrote {args.output_json}")
+
+    if args.output_predictions_csv is not None:
+        predictions = pd.concat(
+            [
+                prediction_frame("val", val_loader.dataset, val_true, val_prob),
+                prediction_frame("test", test_loader.dataset, test_true, test_prob),
+            ],
+            ignore_index=True,
+        )
+        predictions["checkpoint"] = str(args.checkpoint)
+        args.output_predictions_csv.parent.mkdir(parents=True, exist_ok=True)
+        predictions.to_csv(args.output_predictions_csv, index=False)
+        Console().print(f"Wrote {args.output_predictions_csv}")
 
 
 if __name__ == "__main__":

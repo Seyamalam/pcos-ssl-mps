@@ -38,11 +38,15 @@ The 10-epoch SimCLR model has high tuned sensitivity (0.9922) but lower tuned sp
 
 The 50% downstream epoch-sensitivity block adds another caution. Supervised ResNet-18 is essentially saturated by 5 epochs, reaching 0.9981 tuned accuracy with 0.9966 sensitivity and 1.0000 specificity. SimCLR e25 fine-tuning becomes competitive at 10 epochs, reaching 0.9924 tuned accuracy with 0.9955 sensitivity and 0.9885 specificity. At 25 epochs, SimCLR's default accuracy rises to 0.9943, but validation-selected tuned accuracy falls to 0.9843 because specificity drops to 0.9684. This supports a manuscript claim about operating-point reliability and threshold stability rather than simple SSL superiority.
 
-Wilson 95% confidence intervals are now available for the locked validation-selected operating points. For example, supervised ResNet-18 at 50% labels and 5 epochs has tuned accuracy 0.9981 with 95% CI 0.9945-0.9994, while SimCLR at 50% labels and 10 epochs has tuned accuracy 0.9924 with 95% CI 0.9868-0.9957. These are binomial intervals for thresholded metrics, not AUROC/AUPRC intervals; raw prediction export is still needed for bootstrap AUROC/AUPRC reporting.
+Wilson 95% confidence intervals are now available for the locked validation-selected operating points. For example, supervised ResNet-18 at 50% labels and 5 epochs has tuned accuracy 0.9981 with 95% CI 0.9945-0.9994, while SimCLR at 50% labels and 10 epochs has tuned accuracy 0.9924 with 95% CI 0.9868-0.9957. These are binomial intervals for thresholded metrics; AUROC/AUPRC intervals are handled separately with raw prediction exports and paired bootstrap resampling.
+
+Raw prediction export and bootstrap ranking intervals are now implemented for the main manuscript operating points. The 50% supervised ResNet-18 e5 model has AUROC 0.9995 with 95% bootstrap CI 0.9987-1.0000, while the 50% SimCLR e10 model has AUROC 0.9991 with 95% CI 0.9980-0.9999. This confirms that ranking performance is almost saturated for both once tuned, so the manuscript should not lean on AUROC differences alone.
 
 The cross-model robustness results are more nuanced than the clean metrics. ResNet-18 is strongest on clean accuracy but collapses under blur/downsampling. ViT-Tiny has lower clean accuracy but is far more stable under blur and downsample transformations. This may become a major manuscript finding: architecture choice changes robustness even when clean AUROC is uniformly high.
 
 The 25-epoch SimCLR 50% fine-tuned model improved Gaussian-noise accuracy compared with supervised ResNet-18 on the same pHash test split (0.8785 versus 0.7728), but it remained brittle to blur and downsampling (0.5639 and 0.5670 accuracy). This suggests the robustness claim should be transformation-specific rather than framed as SSL being broadly robust.
+
+The robustness severity sweep strengthens the architecture-robustness argument. ViT-Tiny has the best mean corruption accuracy (0.9107) and lowest mean degradation (0.0314) despite lower clean accuracy than ResNet-18. ResNet-18 has the best clean accuracy among the first-epoch supervised baselines (0.9924) but mean degradation is 0.1942. The SimCLR e25 50% e10 checkpoint is clean-competitive (0.9704) but has the largest mean degradation (0.2307) and worst-case degradation (0.5324). This is a valuable negative result: SSL fine-tuning alone does not guarantee corruption robustness.
 
 The first one-epoch label-efficiency pass suggests supervised ImageNet-pretrained ResNet-18 is already strong with small label fractions, but low-label runs can be poorly calibrated. Repeated seeds and longer fine-tuning are needed before making final low-label claims.
 
@@ -59,6 +63,8 @@ The pHash audit found 38 cross-label near-duplicate groups. These must be inspec
 5. Robustness table: clean, crop, contrast, blur, downsample, noise.
 6. Threshold-selected operating-point table with Wilson confidence intervals.
 7. Calibration table: AUROC, AUPRC, ECE, Brier score if added.
+8. Bootstrap AUROC/AUPRC confidence interval table.
+9. Robustness severity sweep table with mean and worst-case degradation.
 
 ## Planned Figures
 

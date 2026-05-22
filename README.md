@@ -511,6 +511,20 @@ Checkpoint: `runs/resnet18_supervised_exact_e1/best_model.pt`
 | SimCLR ResNet-18 10% linear probe | 0.6388 | 0.5437 | 0.5538 | 0.6973 | Pipeline validation only |
 | SimCLR ResNet-18 e25 50% fine-tune | 0.9484 | 0.5639 | 0.5670 | 0.8785 | Better noise robustness than supervised ResNet, still blur/downsample brittle |
 
+### Robustness Severity Sweep Snapshot
+
+All rows use the pHash near-duplicate-aware test split. Each model was evaluated on clean images plus three severity levels for center crop, low contrast, high contrast, blur, downsample, and Gaussian noise.
+
+| Model | Clean acc | Mean corruption acc | Worst corruption acc | Mean degradation | Worst degradation | Main read |
+|---|---:|---:|---:|---:|---:|---|
+| ResNet-18 | 0.9924 | 0.7983 | 0.5620 | 0.1942 | 0.4305 | Clean-strong but brittle to blur/downsample/noise. |
+| EfficientNet-B0 | 0.9635 | 0.8021 | 0.4795 | 0.1614 | 0.4840 | Stable contrast response, weak under noise/downsample. |
+| ViT-Tiny/16 | 0.9421 | 0.9107 | 0.7778 | 0.0314 | 0.1643 | Best robustness profile despite lower clean accuracy. |
+| ConvNeXt-Tiny | 0.8269 | 0.8154 | 0.6023 | 0.0116 | 0.2247 | Under-trained but degradation is small. |
+| SimCLR ResNet-18 e25 50% fine-tune | 0.9704 | 0.7397 | 0.4380 | 0.2307 | 0.5324 | Competitive clean ranking, not robust across severity sweeps. |
+
+Full severity outputs are tracked in `reports/robustness_severity_long.csv` and `reports/robustness_severity_summary.csv`.
+
 ### Validation-Selected Threshold Snapshot
 
 Thresholds are selected on the validation split only, then locked before test evaluation. This is important because several one-epoch models rank cases well but are poorly aligned to the default 0.5 operating point.
@@ -533,6 +547,16 @@ Wilson 95% confidence intervals for tuned accuracy, sensitivity, and specificity
 | ResNet-18 supervised | 5 | 0.9981 (0.9945-0.9994) | 0.9966 (0.9902-0.9989) | 1.0000 (0.9945-1.0000) |
 | SimCLR e25 fine-tune | 10 | 0.9924 (0.9868-0.9957) | 0.9955 (0.9885-0.9983) | 0.9885 (0.9775-0.9942) |
 | SimCLR e25 fine-tune | 25 | 0.9843 (0.9769-0.9893) | 0.9966 (0.9902-0.9989) | 0.9684 (0.9526-0.9790) |
+
+Raw prediction CSVs are now exported for the main manuscript operating points in `reports/predictions/`. Bootstrap AUROC/AUPRC intervals are tracked in `reports/bootstrap_auc_ci.csv`.
+
+| Experiment | AUROC (95% bootstrap CI) | AUPRC (95% bootstrap CI) |
+|---|---:|---:|
+| ResNet-18 supervised, 10% labels, 10 epochs | 0.9989 (0.9967-1.0000) | 0.9994 (0.9984-1.0000) |
+| SimCLR e25 fine-tune, 10% labels, 10 epochs | 0.9975 (0.9947-0.9994) | 0.9985 (0.9971-0.9996) |
+| ResNet-18 supervised, 50% labels, 5 epochs | 0.9995 (0.9987-1.0000) | 0.9996 (0.9992-1.0000) |
+| SimCLR e25 fine-tune, 50% labels, 10 epochs | 0.9991 (0.9980-0.9999) | 0.9994 (0.9987-0.9999) |
+| SimCLR e25 fine-tune, 50% labels, 25 epochs | 0.9992 (0.9981-1.0000) | 0.9995 (0.9988-1.0000) |
 
 ### Repeated-Seed Snapshot
 
@@ -604,8 +628,9 @@ Every experiment should record:
 11. [ ] Add 100% SSL fine-tuning comparison.
 12. [x] Compare against supervised baselines.
 13. [x] Add confidence intervals for validation-selected operating points.
-14. [ ] Add raw prediction export for bootstrap AUROC/AUPRC confidence intervals.
-15. [ ] Add robustness severity sweeps and XAI analysis.
+14. [x] Add raw prediction export for bootstrap AUROC/AUPRC confidence intervals.
+15. [x] Add robustness severity sweeps.
+16. [ ] Add XAI analysis.
 
 ## Current Decision Log
 

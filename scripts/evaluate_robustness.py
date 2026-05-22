@@ -42,6 +42,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--image-size", type=int, default=224)
     parser.add_argument("--batch-size", type=int, default=64)
     parser.add_argument("--num-workers", type=int, default=8)
+    parser.add_argument(
+        "--severity-sweep",
+        action="store_true",
+        help="Evaluate multiple corruption severities for manuscript robustness curves.",
+    )
     return parser.parse_args()
 
 
@@ -100,6 +105,104 @@ def robustness_transforms(image_size: int) -> dict[str, transforms.Compose]:
     }
 
 
+def robustness_severity_transforms(image_size: int) -> dict[str, tuple[str, float, transforms.Compose]]:
+    cases: dict[str, tuple[str, float, transforms.Compose]] = {
+        "clean_resize": (
+            "clean_resize",
+            0.0,
+            transforms.Compose(
+                [transforms.Resize((image_size, image_size)), transforms.ToTensor(), normalize()]
+            ),
+        )
+    }
+
+    for factor in [1.05, 1.15, 1.30]:
+        cases[f"center_crop_zoom_{factor:.2f}"] = (
+            "center_crop",
+            factor,
+            transforms.Compose(
+                [
+                    transforms.Resize(int(image_size * factor)),
+                    transforms.CenterCrop(image_size),
+                    transforms.ToTensor(),
+                    normalize(),
+                ]
+            ),
+        )
+
+    for contrast in [0.75, 0.55, 0.35]:
+        cases[f"low_contrast_{contrast:.2f}"] = (
+            "low_contrast",
+            contrast,
+            transforms.Compose(
+                [
+                    transforms.Resize((image_size, image_size)),
+                    transforms.ColorJitter(contrast=(contrast, contrast)),
+                    transforms.ToTensor(),
+                    normalize(),
+                ]
+            ),
+        )
+
+    for contrast in [1.25, 1.50, 2.00]:
+        cases[f"high_contrast_{contrast:.2f}"] = (
+            "high_contrast",
+            contrast,
+            transforms.Compose(
+                [
+                    transforms.Resize((image_size, image_size)),
+                    transforms.ColorJitter(contrast=(contrast, contrast)),
+                    transforms.ToTensor(),
+                    normalize(),
+                ]
+            ),
+        )
+
+    for radius in [0.5, 1.5, 3.0]:
+        cases[f"blur_radius_{radius:.1f}"] = (
+            "blur",
+            radius,
+            transforms.Compose(
+                [
+                    transforms.Resize((image_size, image_size)),
+                    PILBlur(radius=radius),
+                    transforms.ToTensor(),
+                    normalize(),
+                ]
+            ),
+        )
+
+    for size in [160, 96, 48]:
+        cases[f"downsample_{size}"] = (
+            "downsample",
+            float(size),
+            transforms.Compose(
+                [
+                    transforms.Resize((size, size)),
+                    transforms.Resize((image_size, image_size)),
+                    transforms.ToTensor(),
+                    normalize(),
+                ]
+            ),
+        )
+
+    for std in [0.02, 0.05, 0.10]:
+        cases[f"gaussian_noise_{std:.2f}"] = (
+            "gaussian_noise",
+            std,
+            transforms.Compose(
+                [
+                    transforms.Resize((image_size, image_size)),
+                    transforms.ToTensor(),
+                    AddGaussianNoise(std=std),
+                    normalize(),
+                ]
+            ),
+        )
+
+    return cases
+
+
 def load_model_from_checkpoint(checkpoint_path: Path, device) -> torch.nn.Module:
     checkpoint = torch.load(checkpoint_path, map_location=device)
     config = checkpoint.get("config", {})
@@ -133,8 +236,16 @@ def main() -> None:
     runtime = configure_runtime(seed=42, cpu_threads=18)
     model = load_model_from_checkpoint(args.checkpoint, runtime.device)
 
+    if args.severity_sweep:
+        transform_items = robustness_severity_transforms(args.image_size)
+    else:
+        transform_items = {
+            name: (name, 0.0, transform)
+            for name, transform in robustness_transforms(args.image_size).items()
+        }
+
     results = {}
-    for name, transform in robustness_transforms(args.image_size).items():
+    for name, (condition, severity, transform) in transform_items.items():
         dataset = PCOSImageDataset.from_split_csv(args.split_csv, "test", transform=transform)
         loader = DataLoader(
             dataset,
@@ -144,11 +255,24 @@ def main() -> None:
             pin_memory=False,
             persistent_workers=False,
         )
-        results[name] = evaluate_loader(model, loader, runtime.device)
+        results[name] = {
+            "condition": condition,
+            "severity": severity,
+            **evaluate_loader(model, loader, runtime.device),
+        }
 
     args.output_json.parent.mkdir(parents=True, exist_ok=True)
     with args.output_json.open("w", encoding="utf-8") as handle:
-        json.dump(results, handle, indent=2)
+        json.dump(
+            {
+                "checkpoint": str(args.checkpoint),
+                "split_csv": str(args.split_csv),
+                "severity_sweep": bool(args.severity_sweep),
+                "results": results,
+            },
+            handle,
+            indent=2,
+        )
     Console().print(f"Wrote {args.output_json}")
 
 

@@ -92,6 +92,20 @@ All models below use the pHash near-duplicate-aware test split.
 | SimCLR ResNet-18 10% linear probe | 0.6388 | 0.6419 | 0.5437 | 0.5538 | 0.6973 | Too weak for final claims; pipeline validation only. |
 | SimCLR ResNet-18 e25 50% fine-tune | 0.9484 | 0.9402 | 0.5639 | 0.5670 | 0.8785 | Better noise robustness than supervised ResNet, but still brittle to blur/downsample. |
 
+### Robustness Severity Sweep
+
+All rows use the pHash near-duplicate-aware test split. Each model was evaluated on clean images and three severity levels for center crop, low contrast, high contrast, blur, downsample, and Gaussian noise. Full condition-level results are in `reports/robustness_severity_long.csv`.
+
+| Model | Clean acc | Mean corruption acc | Worst corruption acc | Mean degradation | Worst degradation | Interpretation |
+|---|---:|---:|---:|---:|---:|---|
+| ResNet-18 | 0.9924 | 0.7983 | 0.5620 | 0.1942 | 0.4305 | Excellent clean accuracy, large corruption penalty. |
+| EfficientNet-B0 | 0.9635 | 0.8021 | 0.4795 | 0.1614 | 0.4840 | Strong clean result, but noise/downsample are severe failures. |
+| ViT-Tiny/16 | 0.9421 | 0.9107 | 0.7778 | 0.0314 | 0.1643 | Best robustness profile despite lower clean accuracy. |
+| ConvNeXt-Tiny | 0.8269 | 0.8154 | 0.6023 | 0.0116 | 0.2247 | Under-trained clean model, but degradation is small. |
+| SimCLR ResNet-18 e25 50% fine-tune | 0.9704 | 0.7397 | 0.4380 | 0.2307 | 0.5324 | Competitive clean score, but weakest severity robustness among the main models. |
+
+Condition-level interpretation: ViT-Tiny is strongest under blur and downsample severity sweeps. ResNet-18 and SimCLR ResNet-18 are particularly brittle under blur/downsample, and the SimCLR e25 50% fine-tune also has the weakest worst-case Gaussian-noise accuracy in this sweep. This shifts the robustness argument away from broad SSL robustness and toward architecture-sensitive robustness.
+
 ## SSL Runs
 
 | Run ID | Method | Backbone | Split | Epochs | Loss | Downstream result | Notes |
@@ -195,7 +209,21 @@ Confidence intervals are Wilson 95% intervals for the locked validation-selected
 | `simclr_resnet18_phash_e25_finetune_50pct_e10` | 0.9924 (0.9868-0.9957) | 0.9955 (0.9885-0.9983) | 0.9885 (0.9775-0.9942) |
 | `simclr_resnet18_phash_e25_finetune_50pct_e25` | 0.9843 (0.9769-0.9893) | 0.9966 (0.9902-0.9989) | 0.9684 (0.9526-0.9790) |
 
-These intervals describe thresholded accuracy/sensitivity/specificity only. AUROC/AUPRC confidence intervals still need raw prediction export or bootstrap support.
+These intervals describe thresholded accuracy/sensitivity/specificity only. AUROC/AUPRC bootstrap intervals are reported separately below from raw prediction exports.
+
+## Bootstrap AUROC/AUPRC Confidence Intervals
+
+Raw validation/test prediction CSVs are exported under `reports/predictions/`. The intervals below use 2,000 paired bootstrap resamples on the test split.
+
+| Run ID | AUROC (95% CI) | AUPRC (95% CI) |
+|---|---:|---:|
+| `resnet18_supervised_phash_10pct_e10` | 0.9989 (0.9967-1.0000) | 0.9994 (0.9984-1.0000) |
+| `simclr_resnet18_phash_e25_finetune_10pct_e10` | 0.9975 (0.9947-0.9994) | 0.9985 (0.9971-0.9996) |
+| `resnet18_supervised_phash_50pct_e5` | 0.9995 (0.9987-1.0000) | 0.9996 (0.9992-1.0000) |
+| `simclr_resnet18_phash_e25_finetune_50pct_e10` | 0.9991 (0.9980-0.9999) | 0.9994 (0.9987-0.9999) |
+| `simclr_resnet18_phash_e25_finetune_50pct_e25` | 0.9992 (0.9981-1.0000) | 0.9995 (0.9988-1.0000) |
+
+Interpretation: ranking performance is very high for both supervised and SSL models after sufficient fine-tuning. The more meaningful separation for the manuscript is now threshold stability, calibration, and robustness under severity sweeps.
 
 ## Repeated-Seed Summary
 
