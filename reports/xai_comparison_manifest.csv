@@ -1,0 +1,17 @@
+image_id,rel_path,label,class_name,output_path,model_name,backbone,predicted,pcos_probability
+9a6efea336c4f706,PCOS/noninfected/Image_SetB203.jpg,0,noninfected,reports/gradcam_xai_comparison/xai_000_label0.png,supervised_resnet50pct_e5,resnet18,0,0.0004489341808948666
+9a6efea336c4f706,PCOS/noninfected/Image_SetB203.jpg,0,noninfected,reports/gradcam_xai_comparison/xai_000_label0.png,simclr_resnet50pct_e10,resnet18,0,0.0253314059227705
+b7fc60dc302a664b,PCOS/noninfected/Image_resize_085.jpg,0,noninfected,reports/gradcam_xai_comparison/xai_001_label0.png,supervised_resnet50pct_e5,resnet18,0,0.00037139037158340216
+b7fc60dc302a664b,PCOS/noninfected/Image_resize_085.jpg,0,noninfected,reports/gradcam_xai_comparison/xai_001_label0.png,simclr_resnet50pct_e10,resnet18,0,0.041456494480371475
+06229681e4e2e939,PCOS/noninfected/Image_resize_671  (475).jpg,0,noninfected,reports/gradcam_xai_comparison/xai_002_label0.png,supervised_resnet50pct_e5,resnet18,0,0.0009585570078343153
+06229681e4e2e939,PCOS/noninfected/Image_resize_671  (475).jpg,0,noninfected,reports/gradcam_xai_comparison/xai_002_label0.png,simclr_resnet50pct_e10,resnet18,0,0.04635452851653099
+b3cfad7bf80745e9,PCOS/noninfected/Image_resize_671  (947).jpg,0,noninfected,reports/gradcam_xai_comparison/xai_003_label0.png,supervised_resnet50pct_e5,resnet18,0,0.060543242841959
+b3cfad7bf80745e9,PCOS/noninfected/Image_resize_671  (947).jpg,0,noninfected,reports/gradcam_xai_comparison/xai_003_label0.png,simclr_resnet50pct_e10,resnet18,1,0.5360108613967896
+ec6a443b39b8f982,PCOS/infected/Image_SETA_642.jpg,1,infected,reports/gradcam_xai_comparison/xai_004_label1.png,supervised_resnet50pct_e5,resnet18,1,0.9910290241241455
+ec6a443b39b8f982,PCOS/infected/Image_SETA_642.jpg,1,infected,reports/gradcam_xai_comparison/xai_004_label1.png,simclr_resnet50pct_e10,resnet18,1,0.9977272152900696
+c12844cdb9c18de7,PCOS/infected/Image_SETB_505.jpg,1,infected,reports/gradcam_xai_comparison/xai_005_label1.png,supervised_resnet50pct_e5,resnet18,1,0.9988724589347839
+c12844cdb9c18de7,PCOS/infected/Image_SETB_505.jpg,1,infected,reports/gradcam_xai_comparison/xai_005_label1.png,simclr_resnet50pct_e10,resnet18,1,0.9999148845672607
+2f165c1aad257122,PCOS/infected/image10345.jpg,1,infected,reports/gradcam_xai_comparison/xai_006_label1.png,supervised_resnet50pct_e5,resnet18,1,0.9833654761314392
+2f165c1aad257122,PCOS/infected/image10345.jpg,1,infected,reports/gradcam_xai_comparison/xai_006_label1.png,simclr_resnet50pct_e10,resnet18,1,0.9402217864990234
+2ba45e01e6277479,PCOS/infected/image10622.jpg,1,infected,reports/gradcam_xai_comparison/xai_007_label1.png,supervised_resnet50pct_e5,resnet18,1,0.9581245183944702
+2ba45e01e6277479,PCOS/infected/image10622.jpg,1,infected,reports/gradcam_xai_comparison/xai_007_label1.png,simclr_resnet50pct_e10,resnet18,1,0.9785333275794983

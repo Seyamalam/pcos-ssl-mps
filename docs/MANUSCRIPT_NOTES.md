@@ -48,6 +48,12 @@ The 25-epoch SimCLR 50% fine-tuned model improved Gaussian-noise accuracy compar
 
 The robustness severity sweep strengthens the architecture-robustness argument. ViT-Tiny has the best mean corruption accuracy (0.9107) and lowest mean degradation (0.0314) despite lower clean accuracy than ResNet-18. ResNet-18 has the best clean accuracy among the first-epoch supervised baselines (0.9924) but mean degradation is 0.1942. The SimCLR e25 50% e10 checkpoint is clean-competitive (0.9704) but has the largest mean degradation (0.2307) and worst-case degradation (0.5324). This is a valuable negative result: SSL fine-tuning alone does not guarantee corruption robustness.
 
+Calibration analysis adds another manuscript angle. The supervised ResNet-18 50% e5 checkpoint has the best Brier score (0.0043), while SimCLR 50% e25 has the best ECE (0.0049). However, SimCLR e25 has weaker validation-selected specificity than SimCLR e10, so calibration should be discussed alongside operating-point behavior rather than as an isolated score.
+
+The cross-label pHash inspection is now concrete. All 38 cross-label pHash groups are excluded from the strict split, and several have minimum cross-label pHash distance 0. The largest conflicting group contains 219 images, with 189 infected and 30 noninfected. This supports a strong dataset-quality contribution: some public PCOS ultrasound labels are likely ambiguous, duplicated across labels, or visually indistinguishable under perceptual hashing.
+
+Grad-CAM comparison panels have been generated for supervised ResNet-18 50% e5 and SimCLR ResNet-18 50% e10 on matched test images. These are useful for qualitative inspection, but they should remain a supporting analysis until randomized-weight sanity checks and artifact-mask checks are added.
+
 The first one-epoch label-efficiency pass suggests supervised ImageNet-pretrained ResNet-18 is already strong with small label fractions, but low-label runs can be poorly calibrated. Repeated seeds and longer fine-tuning are needed before making final low-label claims.
 
 ## Important Caution
@@ -65,6 +71,9 @@ The pHash audit found 38 cross-label near-duplicate groups. These must be inspec
 7. Calibration table: AUROC, AUPRC, ECE, Brier score if added.
 8. Bootstrap AUROC/AUPRC confidence interval table.
 9. Robustness severity sweep table with mean and worst-case degradation.
+10. Calibration table with Brier score and ECE.
+11. Cross-label pHash near-duplicate inspection table.
+12. Grad-CAM comparison panel.
 
 ## Planned Figures
 

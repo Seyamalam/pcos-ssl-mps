@@ -1,0 +1,12 @@
+metric,value
+Total readable images,11784
+PCOS-positive images,6784
+Healthy/non-PCOS images,5000
+Exact duplicate groups,1956
+Exact duplicate files beyond first,7788
+pHash near-duplicate groups,1788
+pHash near-duplicate files beyond first,9448
+Cross-label pHash near-duplicate groups,38
+pHash-aware train images,7429
+pHash-aware validation images,1584
+pHash-aware test images,1589

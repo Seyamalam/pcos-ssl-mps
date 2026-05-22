@@ -1,0 +1,11 @@
+near_group_id,group_size,infected_count,noninfected_count,min_cross_label_phash_distance,representative_infected,representative_noninfected
+phash_001185,219,189,30,0,PCOS/infected/image10444.jpg,PCOS/noninfected/Image_159.jpg
+phash_001184,53,29,24,0,PCOS/infected/image10510.jpg,PCOS/noninfected/Image_599.jpg
+phash_001197,28,2,26,0,PCOS/infected/image10648.jpg,PCOS/noninfected/Image_019.jpg
+phash_001269,23,15,8,0,PCOS/infected/image10459.jpg,PCOS/noninfected/Image_899.jpg
+phash_001755,15,1,14,0,PCOS/infected/image10445.jpg,PCOS/noninfected/Image_341.jpg
+phash_001274,10,4,6,0,PCOS/infected/image10920.jpg,PCOS/noninfected/Image_175.jpg
+phash_001801,9,1,8,0,PCOS/infected/image10493.jpg,PCOS/noninfected/Image_443.jpg
+phash_001811,9,1,8,0,PCOS/infected/image10503.jpg,PCOS/noninfected/Image_463.jpg
+phash_001814,9,1,8,0,PCOS/infected/image10507.jpg,PCOS/noninfected/Image_471.jpg
+phash_001819,9,1,8,0,PCOS/infected/image12278.jpg,PCOS/noninfected/Image_481.jpg

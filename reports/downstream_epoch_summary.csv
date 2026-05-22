@@ -8,7 +8,7 @@ Supervised ResNet-18,0.50,10,resnet18_supervised_phash_50pct_e10,0.990560,0.9990
 Supervised ResNet-18,0.50,25,resnet18_supervised_phash_50pct_e25,0.994336,0.999070,0.434364,0.990560,0.996641,0.982759,Default accuracy remains high but selected threshold is not better than e5.
 SimCLR e25 fine-tune,0.10,1,simclr_resnet18_phash_e25_finetune_10pct_e1,0.930774,0.971110,0.421118,0.953430,0.917133,1.000000,Competitive accuracy but weaker AUROC after one epoch.
 SimCLR e25 fine-tune,0.10,5,simclr_resnet18_phash_e25_finetune_10pct_e5,0.930774,0.989336,0.349284,0.955947,0.935050,0.982759,Ranking improves with more epochs; thresholded accuracy changes modestly.
-SimCLR e25 fine-tune,0.10,10,simclr_resnet18_phash_e25_finetune_10pct_e10,0.973568,0.997480,0.194700,0.966646,0.992161,0.933908,Large AUROC and sensitivity gain, but selected-threshold specificity drops.
+SimCLR e25 fine-tune,0.10,10,simclr_resnet18_phash_e25_finetune_10pct_e10,0.973568,0.997480,0.194700,0.966646,0.992161,0.933908,"Large AUROC and sensitivity gain, but selected-threshold specificity drops."
 SimCLR e25 fine-tune,0.50,1,simclr_resnet18_phash_e25_finetune_50pct_e1,0.948395,0.989291,0.466752,0.959723,0.928331,1.000000,Under-tuned at one epoch despite perfect selected specificity.
 SimCLR e25 fine-tune,0.50,5,simclr_resnet18_phash_e25_finetune_50pct_e5,0.962240,0.998127,0.144944,0.982379,0.993281,0.968391,Strong sensitivity gain but lower specificity.
 SimCLR e25 fine-tune,0.50,10,simclr_resnet18_phash_e25_finetune_50pct_e10,0.970422,0.999083,0.893831,0.992448,0.995521,0.988506,Best 50 percent SimCLR operating point so far.

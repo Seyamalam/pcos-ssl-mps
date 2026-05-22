@@ -558,6 +558,13 @@ Raw prediction CSVs are now exported for the main manuscript operating points in
 | SimCLR e25 fine-tune, 50% labels, 10 epochs | 0.9991 (0.9980-0.9999) | 0.9994 (0.9987-0.9999) |
 | SimCLR e25 fine-tune, 50% labels, 25 epochs | 0.9992 (0.9981-1.0000) | 0.9995 (0.9988-1.0000) |
 
+Calibration artifacts:
+
+- `reports/calibration_summary.csv`
+- `reports/figures/calibration_curves.png`
+
+Current calibration read: supervised ResNet-18 at 50% labels and 5 epochs has the best Brier score among the main operating points (`0.0043`). SimCLR at 50% labels and 25 epochs is close (`0.0049`) and has the lowest ECE (`0.0049`), but its validation-selected operating point had weaker specificity than the 10-epoch SimCLR checkpoint.
+
 ### Repeated-Seed Snapshot
 
 Seeds: 42, 7, and 123. All runs use one downstream epoch on the pHash near-duplicate-aware split.
@@ -574,6 +581,36 @@ Seeds: 42, 7, and 123. All runs use one downstream epoch on the pHash near-dupli
 | Date | Attempt | What failed | Likely reason | Decision |
 |---|---|---|---|---|
 | TBD | TBD | TBD | TBD | TBD |
+
+### Cross-Label Near-Duplicate Inspection
+
+The pHash audit found 38 cross-label near-duplicate groups. The inspection report confirms these groups are excluded from the strict pHash split, and multiple groups have cross-label pHash distance `0`, meaning visually near-identical or perceptually identical images appear under both labels.
+
+Artifacts:
+
+- `reports/cross_label_phash_groups.csv`
+- `reports/cross_label_phash_examples.csv`
+- `reports/figures/cross_label_phash_examples.png`
+
+This supports the manuscript argument that public PCOS ultrasound datasets need label-noise and near-duplicate auditing before claims of clinical reliability.
+
+### XAI Comparison
+
+Grad-CAM comparison panels were generated locally for supervised ResNet-18 50% e5 vs SimCLR ResNet-18 50% e10 on matched pHash test samples.
+
+Artifacts:
+
+- `reports/gradcam_xai_comparison/`
+- `reports/xai_comparison_manifest.csv`
+
+The image panels are kept out of Git because they are derivatives of the Kaggle dataset. The manifest is tracked for reproducibility.
+
+### Manuscript Tables
+
+Final manuscript-ready table artifacts are generated from current reports:
+
+- `reports/manuscript_tables.md`
+- `reports/manuscript_tables/`
 
 ## Methodology Notes for Paper
 

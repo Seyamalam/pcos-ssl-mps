@@ -225,6 +225,34 @@ Raw validation/test prediction CSVs are exported under `reports/predictions/`. T
 
 Interpretation: ranking performance is very high for both supervised and SSL models after sufficient fine-tuning. The more meaningful separation for the manuscript is now threshold stability, calibration, and robustness under severity sweeps.
 
+## Calibration and Brier Score
+
+Calibration is computed from exported test predictions. The reliability plot is saved locally at `reports/figures/calibration_curves.png`.
+
+| Run ID | Brier score | ECE | Interpretation |
+|---|---:|---:|---|
+| `resnet18_supervised_phash_50pct_e5` | 0.0043 | 0.0073 | Best Brier score among main operating points. |
+| `simclr_resnet18_phash_e25_finetune_50pct_e25` | 0.0049 | 0.0049 | Best ECE, but weaker tuned specificity than SimCLR e10. |
+| `resnet18_supervised_phash_10pct_e10` | 0.0128 | 0.0178 | Strong low-label supervised calibration. |
+| `simclr_resnet18_phash_e25_finetune_50pct_e10` | 0.0215 | 0.0123 | Strong ranking and threshold metrics, weaker Brier score. |
+| `simclr_resnet18_phash_e25_finetune_10pct_e10` | 0.0237 | 0.0486 | Needs calibration attention at 10% labels. |
+
+## Cross-Label pHash Inspection
+
+The 38 cross-label pHash near-duplicate groups were inspected and summarized in `reports/cross_label_phash_groups.csv` and `reports/cross_label_phash_examples.csv`. Example montage is saved locally at `reports/figures/cross_label_phash_examples.png`.
+
+Key finding: all 38 groups are excluded from the strict pHash split, and several groups have minimum cross-label pHash distance `0`. This indicates visually near-identical, and in some cases perceptually identical, examples under conflicting labels. The largest group contains 219 images: 189 infected and 30 noninfected.
+
+## XAI Comparison
+
+Grad-CAM comparison panels were generated for supervised ResNet-18 50% e5 and SimCLR ResNet-18 50% e10 on matched pHash-aware test samples. Panels are saved locally under `reports/gradcam_xai_comparison/`; the tracked manifest is `reports/xai_comparison_manifest.csv`.
+
+These panels are for manuscript inspection and qualitative auditing. They should be interpreted cautiously until sanity checks with randomized weights and artifact masks are added.
+
+## Manuscript Tables
+
+Current manuscript-ready tables are generated in `reports/manuscript_tables/` with a combined Markdown version at `reports/manuscript_tables.md`.
+
 ## Repeated-Seed Summary
 
 Three-seed summary for the first manuscript-grade repeat block. Seeds are 42, 7, and 123. All runs use one downstream epoch, the pHash near-duplicate-aware split, and ResNet-18.
