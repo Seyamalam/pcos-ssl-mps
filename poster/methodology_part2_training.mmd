@@ -1,0 +1,27 @@
+%%{init: {
+  "theme": "base",
+  "flowchart": { "htmlLabels": true, "curve": "basis", "nodeSpacing": 44, "rankSpacing": 52 },
+  "themeVariables": {
+    "fontFamily": "Inter, Arial, sans-serif",
+    "fontSize": "30px",
+    "primaryTextColor": "#14213D",
+    "lineColor": "#14213D",
+    "tertiaryColor": "#FBFCFD"
+  }
+}}%%
+flowchart TB
+  A["<b>Training Images</b><br/>labels hidden for SSL"]
+  B["<b>SSL Pretraining</b><br/>SimCLR + BYOL ResNet-18"]
+  C["<b>Supervised Baseline</b><br/>ImageNet ResNet-18"]
+  D["<b>Fine-Tune</b><br/>10% and 50% labels"]
+
+  A --> B --> C --> D
+
+  classDef data fill:#008C95,stroke:#006E76,color:#FFFFFF,stroke-width:3px;
+  classDef ssl fill:#2A9D55,stroke:#1F7D40,color:#FFFFFF,stroke-width:3px;
+  classDef base fill:#355C7D,stroke:#254763,color:#FFFFFF,stroke-width:3px;
+  classDef out fill:#E9B44C,stroke:#B8892F,color:#14213D,stroke-width:3px;
+  class A data;
+  class B ssl;
+  class C base;
+  class D out;

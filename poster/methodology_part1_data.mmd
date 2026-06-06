@@ -1,0 +1,27 @@
+%%{init: {
+  "theme": "base",
+  "flowchart": { "htmlLabels": true, "curve": "basis", "nodeSpacing": 44, "rankSpacing": 52 },
+  "themeVariables": {
+    "fontFamily": "Inter, Arial, sans-serif",
+    "fontSize": "30px",
+    "primaryTextColor": "#14213D",
+    "lineColor": "#14213D",
+    "tertiaryColor": "#FBFCFD"
+  }
+}}%%
+flowchart TB
+  A["<b>PCOS-XAI Ultrasound</b><br/>11,784 readable images"]
+  B["<b>Audit Image Quality</b><br/>file hashes + pHash groups"]
+  C["<b>Remove Conflicts</b><br/>38 cross-label pHash groups"]
+  D["<b>Strict Split</b><br/>duplicate groups stay together"]
+
+  A --> B --> C --> D
+
+  classDef start fill:#008C95,stroke:#006E76,color:#FFFFFF,stroke-width:3px;
+  classDef audit fill:#355C7D,stroke:#254763,color:#FFFFFF,stroke-width:3px;
+  classDef warn fill:#D95D39,stroke:#B94425,color:#FFFFFF,stroke-width:3px;
+  classDef out fill:#E9B44C,stroke:#B8892F,color:#14213D,stroke-width:3px;
+  class A start;
+  class B audit;
+  class C warn;
+  class D out;

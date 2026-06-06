@@ -11,6 +11,28 @@ Companion research notes:
 - [Manuscript notes](docs/MANUSCRIPT_NOTES.md)
 - [Manuscript draft](docs/MANUSCRIPT_DRAFT.md)
 
+## Methodology at a Glance
+
+This project is not only a model comparison. It is a reliability-centered PCOS ultrasound evaluation pipeline designed to avoid duplicate leakage, label-conflict artifacts, and misleading leaderboard-style accuracy.
+
+### 1. Data Quality and Duplicate-Aware Splitting
+
+The first step is to audit the public PCOS-XAI ultrasound dataset before training. We check image readability, exact file duplicates, perceptual-hash near-duplicates, and cross-label pHash conflicts. Cross-label pHash groups are removed, and duplicate groups are kept together so that near-identical images do not leak across train, validation, and test splits.
+
+![Methodology part 1: data quality and duplicate-aware splitting](poster/methodology_part1_data.png)
+
+### 2. Model Training and Low-Label Fine-Tuning
+
+After the strict split is built, models are trained under matched conditions. We compare ImageNet-supervised ResNet-18 transfer learning against self-supervised SimCLR and BYOL ResNet-18 encoders. SSL pretraining uses training images without labels; downstream fine-tuning then uses restricted label budgets such as 10% and 50%.
+
+![Methodology part 2: SSL and supervised model training](poster/methodology_part2_training.png)
+
+### 3. Reliability Evaluation
+
+Final evaluation is validation-locked: thresholds are selected on validation predictions, then test predictions are evaluated once. We report accuracy, sensitivity, specificity, Wilson and bootstrap confidence intervals, calibration, corruption robustness, and Grad-CAM sanity checks.
+
+![Methodology part 3: validation-locked reliability report](poster/methodology_part3_reliability.png)
+
 ## Research Goal
 
 Develop and evaluate self-supervised learning methods that can learn useful ovarian ultrasound representations from a noisy, duplicate-heavy, mixed-quality PCOS dataset, then fine-tune those representations for PCOS vs healthy ovary classification under leakage-controlled evaluation.
@@ -109,34 +131,6 @@ Important notes:
 4. Which SSL method is most stable on noisy ovarian ultrasound images?
 5. Do SSL-trained models produce more anatomically meaningful explanations?
 6. Are the learned models robust to resolution, crop, contrast, and artifact changes?
-
-## Methodology Flowchart
-
-```mermaid
-flowchart TD
-    A["Raw PCOS-XAI ultrasound dataset<br/>11,784 images"] --> B["Dataset audit<br/>readability, dimensions, class counts"]
-    B --> C["Duplicate analysis<br/>MD5 exact duplicates"]
-    B --> D["Near-duplicate analysis<br/>pHash Hamming distance <= 4"]
-    C --> E["Exact duplicate-aware split<br/>no MD5 group crosses train/val/test"]
-    D --> F["pHash near-duplicate-aware split<br/>cross-label near groups excluded"]
-
-    E --> G["Supervised baselines<br/>ResNet, EfficientNet, ConvNeXt, ViT"]
-    F --> G
-    F --> H["Self-supervised pretraining<br/>SimCLR and BYOL on unlabeled train images"]
-
-    G --> I["Clean test evaluation<br/>Accuracy, AUROC, AUPRC, F1, ECE"]
-    H --> J["Downstream evaluation<br/>linear probe and fine-tuning"]
-
-    J --> K["Label-efficiency study<br/>5%, 10%, 25%, 50%, 100% labels"]
-    G --> K
-
-    I --> L["Robustness tests<br/>crop, contrast, blur, downsample, noise"]
-    K --> L
-    L --> M["Explainability audit<br/>Grad-CAM and attribution stability"]
-
-    M --> N["Manuscript evidence<br/>leakage control, label efficiency, robustness, XAI"]
-    L --> N
-```
 
 ## Experimental Design
 

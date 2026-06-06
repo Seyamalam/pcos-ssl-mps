@@ -1,0 +1,27 @@
+%%{init: {
+  "theme": "base",
+  "flowchart": { "htmlLabels": true, "curve": "basis", "nodeSpacing": 44, "rankSpacing": 52 },
+  "themeVariables": {
+    "fontFamily": "Inter, Arial, sans-serif",
+    "fontSize": "30px",
+    "primaryTextColor": "#14213D",
+    "lineColor": "#14213D",
+    "tertiaryColor": "#FBFCFD"
+  }
+}}%%
+flowchart TB
+  A["<b>Validation Predictions</b><br/>choose operating threshold"]
+  B["<b>Test Once</b><br/>accuracy, sensitivity, specificity"]
+  C["<b>Uncertainty</b><br/>Wilson + bootstrap intervals"]
+  D["<b>Reliability Checks</b><br/>calibration, corruptions, Grad-CAM sanity"]
+
+  A --> B --> C --> D
+
+  classDef val fill:#D95D39,stroke:#B94425,color:#FFFFFF,stroke-width:3px;
+  classDef test fill:#008C95,stroke:#006E76,color:#FFFFFF,stroke-width:3px;
+  classDef ci fill:#355C7D,stroke:#254763,color:#FFFFFF,stroke-width:3px;
+  classDef report fill:#E9B44C,stroke:#B8892F,color:#14213D,stroke-width:3px;
+  class A val;
+  class B test;
+  class C ci;
+  class D report;

@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>PCOS SSL Research Poster</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              ink: "#14213D",
+              muted: "#34465A",
+              teal: "#008C95",
+              green: "#2A9D55",
+              coral: "#D95D39",
+              gold: "#E9B44C",
+              paper: "#FBFCFD",
+              line: "#D8E2E8",
+            },
+            boxShadow: {
+              poster: "0 12px 40px rgba(20,33,61,.12)",
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      @page {
+        size: 24in 36in;
+        margin: 0;
+      }
+
+      html,
+      body {
+        margin: 0;
+        width: 24in;
+        min-height: 36in;
+        background: #e9eef2;
+        color: #14213d;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        font-size: 1.12rem;
+        letter-spacing: 0;
+      }
+
+      .poster {
+        width: 24in;
+        height: 36in;
+        overflow: hidden;
+      }
+
+      .section-title {
+        letter-spacing: 0;
+      }
+
+      .section-title::after {
+        content: "";
+        display: block;
+        width: 7.5rem;
+        height: 2px;
+        margin-top: 0.35rem;
+        background: currentColor;
+        opacity: 0.85;
+      }
+
+      .masonry {
+        column-count: 3;
+        column-gap: 1rem;
+      }
+
+      .card {
+        display: inline-block;
+        width: 100%;
+        break-inside: avoid;
+        margin: 0 0 1rem;
+        vertical-align: top;
+      }
+
+      .figure img {
+        display: block;
+        width: 100%;
+        max-height: var(--max-h, none);
+        height: auto;
+        object-fit: contain;
+      }
+
+      .caption {
+        font-size: 0.92rem;
+        line-height: 1.18rem;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      th,
+      td {
+        border-bottom: 1px solid #d8e2e8;
+        padding: 0.36rem 0.35rem;
+      }
+
+      th {
+        color: #008c95;
+        text-align: left;
+        font-weight: 900;
+      }
+
+      td:not(:first-child),
+      th:not(:first-child) {
+        text-align: right;
+      }
+
+      @media print {
+        html,
+        body {
+          background: white;
+        }
+        .poster {
+          box-shadow: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="poster mx-auto bg-paper shadow-poster">
+      <header class="relative bg-ink px-16 pt-12 pb-8 text-white">
+        <div class="absolute bottom-0 left-0 h-2 w-[70%] bg-teal"></div>
+        <div class="absolute bottom-0 right-0 h-2 w-[30%] bg-gold"></div>
+
+        <h1 class="max-w-[19.5in] text-[3.1rem] font-extrabold leading-[3.35rem] tracking-normal">
+          Reliability-Centered Self-Supervised Learning for PCOS Ultrasound Classification
+          <br />
+          Under Duplicate-Aware Evaluation
+        </h1>
+        <p class="mt-5 text-[1.34rem] font-semibold text-slate-200">
+          Touhidul Alam Seyam | Afrin Sultana Niharika | Shafiul Azam Mahin | Chandnin Baria Jowthi
+        </p>
+        <p class="mt-1 text-[1.04rem] font-semibold text-slate-300">
+          Department of Computer Science &amp; Engineering, BGC Trust University Bangladesh, Chattogram, Bangladesh
+        </p>
+        <div class="mt-5 flex gap-3 text-[1.02rem] font-bold">
+          <span class="rounded-full bg-teal px-4 py-1">PCOS Ultrasound</span>
+          <span class="rounded-full bg-green px-4 py-1">SimCLR + BYOL</span>
+          <span class="rounded-full bg-coral px-4 py-1">Duplicate-Aware Splits</span>
+          <span class="rounded-full bg-gold px-4 py-1 text-ink">Reliability Audit</span>
+        </div>
+      </header>
+
+      <section class="px-12 pt-6">
+        <article class="rounded-lg border border-line bg-white p-6">
+          <h2 class="section-title text-[1.72rem] font-extrabold text-teal">Abstract</h2>
+          <p class="mt-3 text-[1.18rem] font-semibold leading-[1.58rem] text-ink">
+            Public PCOS ultrasound datasets can support rapid AI research, but duplicated images, pHash near-duplicates,
+            label conflicts, and preprocessing artifacts can inflate headline performance. We evaluate PCOS-XAI ultrasound
+            classification with a reliability-centered protocol: exact and perceptual duplicate auditing, cross-label group
+            exclusion, duplicate-aware train/validation/test splits, supervised transfer baselines, SimCLR and BYOL
+            self-supervised encoders, validation-selected operating points, confidence intervals, calibration, corruption
+            robustness, and Grad-CAM sanity checks. The main finding is nuanced: supervised ResNet-18 remains the strongest
+            low-label default, while SimCLR and BYOL become competitive at 50% labels when threshold selection is handled
+            carefully.
+          </p>
+        </article>
+      </section>
+
+      <section class="px-12 pt-5">
+        <div class="grid grid-cols-4 overflow-hidden rounded-lg border border-line bg-white">
+          <div class="bg-ink p-6 text-white">
+            <h2 class="text-[1.45rem] font-extrabold">Key Message</h2>
+            <p class="mt-2 text-[1rem] font-semibold leading-[1.25rem] text-slate-200">
+              Clean accuracy and AUROC are not enough for duplicate-heavy medical imaging datasets.
+            </p>
+          </div>
+          <div class="bg-teal p-6 text-center text-white">
+            <div class="text-[2.2rem] font-extrabold leading-none">11,784</div>
+            <div class="mt-1 text-[.95rem] font-extrabold uppercase">readable images</div>
+          </div>
+          <div class="bg-green p-6 text-center text-white">
+            <div class="text-[2.2rem] font-extrabold leading-none">0.9939</div>
+            <div class="mt-1 text-[.95rem] font-extrabold uppercase">SimCLR tuned acc.</div>
+          </div>
+          <div class="bg-[#fff5d8] p-6 text-ink">
+            <div class="text-[1.12rem] font-extrabold text-coral">Duplicate caveat</div>
+            <p class="mt-2 text-[.98rem] font-semibold leading-[1.2rem]">
+              38 cross-label pHash groups were excluded before strict evaluation.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section class="px-12 pt-5">
+        <article class="rounded-lg border border-line bg-white p-5">
+          <h2 class="section-title text-[1.45rem] font-extrabold text-coral">Methodology in 3 Parts</h2>
+          <div class="mt-4 grid grid-cols-3 gap-4">
+            <figure class="figure">
+              <img src="methodology_part1_data.png" alt="Mermaid workflow for dataset audit and duplicate-aware splitting" style="max-height: 4.8in;" />
+              <figcaption class="caption mt-2 text-muted"><strong>1. Data quality:</strong> audit images, remove cross-label conflicts, and split duplicate groups safely.</figcaption>
+            </figure>
+            <figure class="figure">
+              <img src="methodology_part2_training.png" alt="Mermaid workflow for SSL and supervised model training" style="max-height: 4.8in;" />
+              <figcaption class="caption mt-2 text-muted"><strong>2. Model training:</strong> compare supervised transfer with SimCLR and BYOL under low-label budgets.</figcaption>
+            </figure>
+            <figure class="figure">
+              <img src="methodology_part3_reliability.png" alt="Mermaid workflow for thresholding and reliability evaluation" style="max-height: 4.8in;" />
+              <figcaption class="caption mt-2 text-muted"><strong>3. Reliability report:</strong> lock thresholds, test once, and report uncertainty plus stress tests.</figcaption>
+            </figure>
+          </div>
+        </article>
+      </section>
+
+      <section class="px-12 pt-5">
+        <div class="masonry">
+          <article class="card rounded-lg border border-line bg-white p-5">
+            <h2 class="section-title text-[1.35rem] font-extrabold text-teal">Dataset Audit</h2>
+            <div class="mt-4 grid grid-cols-2 gap-3 text-center">
+              <div class="rounded-md bg-[#E8FAFB] p-3"><div class="text-[1.5rem] font-extrabold text-teal">6,784</div><div class="text-[.85rem] font-bold">PCOS-positive</div></div>
+              <div class="rounded-md bg-[#E8FAFB] p-3"><div class="text-[1.5rem] font-extrabold text-teal">5,000</div><div class="text-[.85rem] font-bold">healthy/non-PCOS</div></div>
+              <div class="rounded-md bg-[#E8FAFB] p-3"><div class="text-[1.5rem] font-extrabold text-teal">1,956</div><div class="text-[.85rem] font-bold">exact duplicate groups</div></div>
+              <div class="rounded-md bg-[#E8FAFB] p-3"><div class="text-[1.5rem] font-extrabold text-teal">1,788</div><div class="text-[.85rem] font-bold">pHash groups</div></div>
+            </div>
+            <figure class="figure mt-4" style="--max-h: 7.1in;">
+              <img src="../reports/figures/duplicate_conflict_panel.png" alt="Cross-label pHash near duplicate examples" />
+              <figcaption class="caption mt-2 text-muted">Visually similar images appearing under conflicting labels.</figcaption>
+            </figure>
+          </article>
+
+          <article class="card rounded-lg border border-line bg-white p-5">
+            <h2 class="section-title text-[1.35rem] font-extrabold text-green">Matched SSL Comparison</h2>
+            <table class="mt-3 text-[.92rem] font-bold">
+              <thead><tr><th>Method</th><th>Labels</th><th>Acc.</th><th>AUROC</th><th>Tuned</th></tr></thead>
+              <tbody>
+                <tr><td>Supervised ResNet-18</td><td>10%</td><td>0.9794</td><td>0.9984</td><td>0.9832</td></tr>
+                <tr><td>SimCLR e25</td><td>10%</td><td>0.9755</td><td>0.9963</td><td>0.9759</td></tr>
+                <tr><td>BYOL e25</td><td>10%</td><td>0.9507</td><td>0.9942</td><td>0.9675</td></tr>
+                <tr><td>Supervised ResNet-18</td><td>50%</td><td>0.9931</td><td>0.9991</td><td>0.9931</td></tr>
+                <tr><td>SimCLR e25</td><td>50%</td><td>0.9673</td><td>0.9986</td><td>0.9939</td></tr>
+                <tr><td>BYOL e25</td><td>50%</td><td>0.9734</td><td>0.9981</td><td>0.9899</td></tr>
+              </tbody>
+            </table>
+          </article>
+
+          <article class="card rounded-lg border border-line bg-white p-5">
+            <h2 class="section-title text-[1.35rem] font-extrabold text-teal">Label Efficiency</h2>
+            <figure class="figure mt-3" style="--max-h: 5.8in;">
+              <img src="../reports/figures/label_efficiency_tuned_vs_default.png" alt="Label efficiency" />
+              <figcaption class="caption mt-2 text-muted">Threshold tuning changes the practical ranking of SSL and supervised checkpoints.</figcaption>
+            </figure>
+          </article>
+
+          <article class="card rounded-lg border border-line bg-white p-5">
+            <h2 class="section-title text-[1.35rem] font-extrabold text-teal">Operating Points</h2>
+            <table class="mt-3 text-[.94rem] font-bold">
+              <thead><tr><th>Checkpoint</th><th>Acc.</th><th>Sens.</th><th>Spec.</th></tr></thead>
+              <tbody>
+                <tr><td>Supervised e5</td><td>0.9981</td><td>0.9966</td><td>1.0000</td></tr>
+                <tr><td>SimCLR e10</td><td>0.9924</td><td>0.9955</td><td>0.9885</td></tr>
+                <tr><td>BYOL e10</td><td>0.9937</td><td>0.9955</td><td>0.9914</td></tr>
+              </tbody>
+            </table>
+            <figure class="figure mt-4" style="--max-h: 5.4in;">
+              <img src="../reports/figures/threshold_accuracy_ci.png" alt="Threshold confidence intervals" />
+              <figcaption class="caption mt-2 text-muted">Wilson intervals for validation-selected operating-point accuracy.</figcaption>
+            </figure>
+          </article>
+
+          <article class="card rounded-lg border border-line bg-white p-5">
+            <h2 class="section-title text-[1.35rem] font-extrabold text-coral">Why Thresholds Matter</h2>
+            <p class="mt-3 text-[1.02rem] font-semibold leading-[1.3rem] text-ink">
+              AUROC was almost saturated for strong checkpoints. Validation-selected thresholds better expose sensitivity,
+              specificity, and screening tradeoffs than a default 0.5 threshold alone.
+            </p>
+            <div class="mt-4 grid grid-cols-2 gap-3 text-center">
+              <div class="rounded-md bg-[#F9FCFD] p-4"><div class="text-[1.65rem] font-extrabold text-teal">0.9995</div><div class="text-[.86rem] font-extrabold">supervised AUROC</div></div>
+              <div class="rounded-md bg-[#F9FCFD] p-4"><div class="text-[1.65rem] font-extrabold text-green">0.9991</div><div class="text-[.86rem] font-extrabold">SimCLR AUROC</div></div>
+            </div>
+          </article>
+
+          <article class="card rounded-lg border border-line bg-white p-5">
+            <h2 class="section-title text-[1.35rem] font-extrabold text-green">Calibration + Robustness</h2>
+            <p class="mt-3 text-[1.02rem] font-semibold leading-[1.3rem] text-ink">
+              Calibration improved some checkpoints, but corruption severity showed that clean accuracy did not guarantee
+              stability under blur, downsampling, contrast changes, crop, or noise.
+            </p>
+            <figure class="figure mt-4" style="--max-h: 5.5in;">
+              <img src="../reports/figures/robustness_severity_summary.png" alt="Robustness severity summary" />
+              <figcaption class="caption mt-2 text-muted">High clean accuracy can still degrade sharply under image corruption.</figcaption>
+            </figure>
+          </article>
+
+          <article class="card rounded-lg border border-line bg-white p-5">
+            <h2 class="section-title text-[1.35rem] font-extrabold text-teal">Grad-CAM Sanity</h2>
+            <figure class="figure mt-3" style="--max-h: 6.3in;">
+              <img src="../reports/figures/gradcam_sanity_panel.png" alt="Grad-CAM sanity panel" />
+              <figcaption class="caption mt-2 text-muted">Trained-vs-random and border-mask checks reduce overinterpretation of heatmaps.</figcaption>
+            </figure>
+          </article>
+
+          <article class="card rounded-lg border border-line bg-white p-5">
+            <h2 class="section-title text-[1.35rem] font-extrabold text-coral">Interpretation</h2>
+            <ul class="mt-3 list-disc space-y-2 pl-5 text-[1.02rem] font-semibold leading-[1.25rem] text-ink">
+              <li>Supervised ResNet-18 is the safest low-label default at 10% labels.</li>
+              <li>SimCLR and BYOL become competitive at 50% labels after validation thresholding.</li>
+              <li>Reliability checks reveal failure modes that clean accuracy hides.</li>
+              <li>Grad-CAM should be reported with sanity tests, not as standalone clinical proof.</li>
+            </ul>
+          </article>
+
+        </div>
+      </section>
+
+      <section class="px-12 pt-3">
+        <article class="rounded-lg bg-ink p-5 text-white">
+          <h2 class="text-[1.45rem] font-extrabold text-gold">Conclusion</h2>
+          <p class="mt-2 text-[1.06rem] font-semibold leading-[1.28rem] text-slate-100">
+            In low-cleanliness PCOS ultrasound classification, the evaluation protocol is as important as the model:
+            duplicate-aware splitting, confidence intervals, calibration, robustness, and XAI sanity checks make the result
+            more trustworthy than leaderboard-style accuracy alone.
+          </p>
+        </article>
+      </section>
+
+      <footer class="mx-12 mt-3 rounded-md bg-ink px-5 py-3 text-[.88rem] font-semibold leading-[1.1rem] text-slate-200">
+        Code: github.com/Seyamalam/pcos-ssl-mps | Dataset: PCOS-XAI Ultrasound Dataset, Kaggle |
+        Contact: touhidulalam@bgctub.ac.bd | Poster size: 24 in x 36 in portrait
+      </footer>
+    </main>
+  </body>
+</html>
